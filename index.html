@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snapshot RAW Enhance - Paper and Poster</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f7f7f7; color: #222; }
+    header { background: #1f2937; color: #fff; padding: 24px 16px; text-align: center; }
+    main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px; padding: 20px; }
+    h1, h2 { margin: 0 0 12px; }
+    p { line-height: 1.6; }
+    .links a { display: inline-block; margin-right: 14px; margin-bottom: 10px; padding: 10px 16px; background: #2563eb; color: #fff; border-radius: 6px; text-decoration: none; }
+    .links a:hover { background: #1d4ed8; }
+    iframe { width: 100%; min-height: 720px; border: 1px solid #ddd; border-radius: 8px; }
+    footer { text-align: center; padding: 18px 16px; color: #555; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Snapshot RAW Enhance</h1>
+    <p>Host for the paper and poster</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Paper</h2>
+      <p>Read the full research paper below or download it directly.</p>
+      <div class="links">
+        <a href="paper/paper.pdf" target="_blank">Open Paper</a>
+        <a href="paper/paper.pdf" download>Download Paper</a>
+      </div>
+      <iframe src="paper/paper.pdf" title="Paper"></iframe>
+    </section>
+    <section class="card">
+      <h2>Poster</h2>
+      <p>View the poster below or download it for offline access.</p>
+      <div class="links">
+        <a href="poster/poster.pdf" target="_blank">Open Poster</a>
+        <a href="poster/poster.pdf" download>Download Poster</a>
+      </div>
+      <iframe src="poster/poster.pdf" title="Poster"></iframe>
+    </section>
+  </main>
+  <footer>
+    <p>Place <code>paper.pdf</code> and <code>poster.pdf</code> in the same folder as this page.</p>
+  </footer>
+</body>
+</html>
