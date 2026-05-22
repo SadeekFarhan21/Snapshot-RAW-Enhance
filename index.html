@@ -1,49 +1,526 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snapshot RAW Enhance - Paper and Poster</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f7f7f7; color: #222; }
-    header { background: #1f2937; color: #fff; padding: 24px 16px; text-align: center; }
-    main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
-    .card { background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px; padding: 20px; }
-    h1, h2 { margin: 0 0 12px; }
-    p { line-height: 1.6; }
-    .links a { display: inline-block; margin-right: 14px; margin-bottom: 10px; padding: 10px 16px; background: #2563eb; color: #fff; border-radius: 6px; text-decoration: none; }
-    .links a:hover { background: #1d4ed8; }
-    iframe { width: 100%; min-height: 720px; border: 1px solid #ddd; border-radius: 8px; }
-    footer { text-align: center; padding: 18px 16px; color: #555; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</title>
+<meta name="description" content="Joint-CS: a single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned LISTA c-step." />
+<meta property="og:title" content="Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery" />
+<meta property="og:description" content="ENGS 109 final project — Farhan Sadeek, Thayer School of Engineering, Dartmouth College." />
+<meta property="og:image" content="figures/rate_distortion.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #5b6470;
+    --rule: #e6e8eb;
+    --accent: #0a4d8c;
+    --accent-soft: #eaf2fb;
+    --code-bg: #f5f6f8;
+    --max-width: 880px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a;
+      --fg: #e9edf1;
+      --muted: #9aa3ad;
+      --rule: #2a2f35;
+      --accent: #6cb1ff;
+      --accent-soft: #18293f;
+      --code-bg: #1d2126;
+    }
+    figure img, .pdf-frame { background: #fff; }
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Liberation Sans", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  h1 {
+    font-size: 28px;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  h1 .small {
+    display: block;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .authors {
+    margin: 14px 0 6px;
+    font-size: 17px;
+  }
+  .authors a { color: var(--fg); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .affiliation {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+  .venue {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+  .links {
+    margin: 22px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.05s ease;
+  }
+  .links a:hover { background: transparent; border-color: var(--accent); }
+  .links a:active { transform: translateY(1px); }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 700;
+    margin: 44px 0 14px;
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+  }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+
+  figure { margin: 24px 0; }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: #fff;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  figcaption b { color: var(--fg); }
+
+  .pdf-frame {
+    width: 100%;
+    height: 80vh;
+    min-height: 540px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 14px 0 6px;
+    font-size: 14.5px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid var(--rule);
+  }
+  td:first-child, th:first-child { text-align: left; }
+  td b { color: var(--accent); }
+  .table-wrap { overflow-x: auto; }
+
+  pre, code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    line-height: 1.5;
+    border: 1px solid var(--rule);
+  }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre code { background: transparent; padding: 0; }
+
+  ul { padding-left: 22px; margin: 0 0 14px; }
+  li { margin: 4px 0; }
+
+  .pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  details { margin: 18px 0; }
+  details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 8px 0;
+    user-select: none;
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  mjx-container { max-width: 100%; }
+  mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
+
 <body>
-  <header>
-    <h1>Snapshot RAW Enhance</h1>
-    <p>Host for the paper and poster</p>
-  </header>
-  <main>
-    <section class="card">
-      <h2>Paper</h2>
-      <p>Read the full research paper below or download it directly.</p>
-      <div class="links">
-        <a href="paper/paper.pdf" target="_blank">Open Paper</a>
-        <a href="paper/paper.pdf" download>Download Paper</a>
-      </div>
-      <iframe src="paper/paper.pdf" title="Paper"></iframe>
-    </section>
-    <section class="card">
-      <h2>Poster</h2>
-      <p>View the poster below or download it for offline access.</p>
-      <div class="links">
-        <a href="poster/poster.pdf" target="_blank">Open Poster</a>
-        <a href="poster/poster.pdf" download>Download Poster</a>
-      </div>
-      <iframe src="poster/poster.pdf" title="Poster"></iframe>
-    </section>
-  </main>
-  <footer>
-    <p>Place <code>paper.pdf</code> and <code>poster.pdf</code> in the same folder as this page.</p>
-  </footer>
+<main>
+
+<header>
+  <h1>
+    Joint-CS:
+    <span class="small">Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</span>
+  </h1>
+
+  <div class="authors">
+    <a href="mailto:farhan.sadeek.29@dartmouth.edu">Farhan Sadeek</a>
+  </div>
+  <p class="affiliation">Thayer School of Engineering, Dartmouth College</p>
+  <p class="venue">ENGS 109 final project &middot; NeurIPS-format manuscript, 2026</p>
+
+  <div class="links">
+    <a href="paper/neurips_2026.pdf">Paper (PDF)</a>
+    <a href="poster/poster.pdf">Poster (PDF)</a>
+    <a href="https://github.com/farhansadeek/Snapshot-RAW-Enhance">Code</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</header>
+
+<section id="abstract">
+  <h2>Abstract</h2>
+  <p>
+    The traditional camera pipeline samples at Shannon&ndash;Nyquist rates,
+    compresses to a sparse representation, and only afterwards performs
+    illumination correction on the decoded image. This sequential ordering
+    discards information: sparse recovery applied to a signal whose dynamic
+    range is dominated by an unknown multiplicative illumination field has
+    weaker recovery guarantees than the same recovery applied to the
+    underlying reflectance. We formulate <em>Joint-CS</em>, a single inverse
+    problem in the joint variables of DCT-domain reflectance coefficients
+    and a smooth per-column illumination field, and solve it by
+    block-coordinate alternation between a learned-iterative-shrinkage step
+    on the coefficients and a closed-form ridge step on the illumination.
+    Across four experiments on a 5-image natural-scene set &mdash; an
+    empirical Donoho&ndash;Tanner phase transition, a multi-image
+    rate&ndash;distortion sweep, a deep-unfolded LISTA solver, and a
+    per-scene ablation against a sequential CS-then-illumination-correct
+    baseline &mdash; we find that the joint formulation outperforms the
+    sequential one by up to <b>+4.7&nbsp;dB PSNR</b> on textured scenes
+    under an 8&times; illumination gradient, and that a $K{=}10$ unrolled
+    LISTA matches what FISTA needs <b>22 iterations</b> to reach. We also
+    report a clear failure mode: on near-uniform scenes (moon) the joint
+    $g$-update lacks signal to estimate gain from and the method degrades
+    by $\sim 8$&nbsp;dB &mdash; a scene-dependence that, to our knowledge,
+    the prior CS+ISP literature does not report.
+  </p>
+</section>
+
+<section id="overview">
+  <h2>Method overview</h2>
+
+  <p>
+    The forward model is the standard compressive-sensing measurement
+    $\boldsymbol{y} = \boldsymbol{A}\boldsymbol{x} + \boldsymbol{w}$ with
+    $\boldsymbol{A} \in \mathbb{R}^{M\times N}$, $M \ll N$, and bounded
+    noise $\boldsymbol{w}$. The reflectance $\boldsymbol{s}$ is assumed
+    $S$-sparse in a 2D-DCT basis $\boldsymbol{\Psi}$. In a low-light or
+    HDR scene the RAW signal is the product of reflectance and a smooth
+    spatial illumination field,
+    $\boldsymbol{x} = \boldsymbol{s} \odot \boldsymbol{g}$.
+  </p>
+
+  <h3>Joint objective</h3>
+  <p>
+    Rather than recover $\boldsymbol{x}$ first and divide out
+    $\boldsymbol{g}$ afterwards, we optimize a single objective in
+    $(\boldsymbol{c}, \boldsymbol{g})$:
+  </p>
+
+  $$
+  \min_{\boldsymbol{c},\boldsymbol{g}}\;
+  \tfrac{1}{2} \big\| \boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g})\,
+    \boldsymbol{\Psi}\boldsymbol{c} - \boldsymbol{y} \big\|_2^2
+  + \lambda_c \|\boldsymbol{c}\|_1
+  + \lambda_g \|\nabla \boldsymbol{g}\|_2^2.
+  $$
+
+  <p>
+    The problem is multiplicatively bilinear in $(\boldsymbol{c},
+    \boldsymbol{g})$ &mdash; non-convex jointly, convex in each block
+    individually &mdash; so we alternate:
+  </p>
+  <ul>
+    <li>
+      <b>c-step.</b> With $\boldsymbol{g}$ fixed, the effective sensing
+      matrix is $\boldsymbol{A}_{\text{eff}} =
+      \boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g})\,\boldsymbol{\Psi}$ and
+      the $\boldsymbol{c}$-update is a Lasso, solved by FISTA &mdash; or by
+      a $K{=}10$-layer LISTA at deployment.
+    </li>
+    <li>
+      <b>g-step.</b> With $\boldsymbol{c}$ fixed, the $\boldsymbol{g}$-update
+      is a ridge regression with closed form
+      $\boldsymbol{g}^\star = (\boldsymbol{B}^\top \boldsymbol{B}
+       + \lambda_g \boldsymbol{L})^{-1} \boldsymbol{B}^\top \boldsymbol{y}$.
+    </li>
+  </ul>
+
+  <h3>Deep-unfolded c-step (LISTA)</h3>
+  <p>
+    To amortize the c-step we replace the FISTA inner loop with $K$
+    unrolled ISTA layers whose encoder, recurrent, and threshold parameters
+    are <em>learned</em>:
+  </p>
+  $$
+  \boldsymbol{c}^{(k+1)} =
+  \mathcal{S}_{\theta_k}\!\big(
+    \boldsymbol{W}_t \boldsymbol{c}^{(k)} + \boldsymbol{W}_e \boldsymbol{y}
+  \big),\quad k=0,\dots,K-1.
+  $$
+  <p>
+    Initializing
+    $\boldsymbol{W}_e = (1/L)(\boldsymbol{A}\boldsymbol{\Psi})^\top$,
+    $\boldsymbol{W}_t = \boldsymbol{I} - (1/L)(\boldsymbol{A}\boldsymbol{\Psi})^\top \boldsymbol{A}\boldsymbol{\Psi}$,
+    and $\theta_k = \lambda/L$ exactly reproduces ISTA at training-step
+    zero, so the network is a strict generalization of the classical
+    solver.
+  </p>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+
+  <h3>Rate&ndash;distortion across natural images <span class="pill">Exp. 2</span></h3>
+  <figure>
+    <img src="figures/rate_distortion.png" alt="Rate-distortion sweep on five natural images.">
+    <figcaption>
+      <b>FISTA and ADMM beat OMP by 2&ndash;3&nbsp;dB across the useful
+      measurement-rate range.</b> 5-image test set (cameraman, astronaut,
+      coins, page, moon) at 64&times;64 grayscale, 16&times;16 DCT blocks,
+      Gaussian sensing, SNR&nbsp;=&nbsp;30&nbsp;dB.
+    </figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>$\delta = M/N$</th><th>OMP</th><th>FISTA</th><th>ADMM</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0.10</td><td>15.46 &plusmn; 4.4</td><td><b>16.67 &plusmn; 4.8</b></td><td>11.23 &plusmn; 3.1</td></tr>
+        <tr><td>0.20</td><td>17.42 &plusmn; 4.3</td><td><b>19.39 &plusmn; 4.5</b></td><td>17.62 &plusmn; 4.8</td></tr>
+        <tr><td>0.30</td><td>19.15 &plusmn; 4.0</td><td><b>21.73 &plusmn; 4.3</b></td><td>21.27 &plusmn; 4.6</td></tr>
+        <tr><td>0.40</td><td>20.42 &plusmn; 3.7</td><td><b>23.64 &plusmn; 4.1</b></td><td>23.47 &plusmn; 4.4</td></tr>
+        <tr><td>0.50</td><td>21.73 &plusmn; 3.2</td><td><b>25.06 &plusmn; 3.9</b></td><td>24.98 &plusmn; 4.0</td></tr>
+        <tr><td>0.60</td><td>23.50 &plusmn; 3.0</td><td><b>26.43 &plusmn; 3.8</b></td><td>26.37 &plusmn; 3.9</td></tr>
+        <tr><td>0.70</td><td>24.89 &plusmn; 3.0</td><td><b>27.57 &plusmn; 3.5</b></td><td>27.45 &plusmn; 3.7</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted);margin-top:4px">PSNR in dB, mean &plusmn; std across the 5-image set.</p>
+
+  <figure>
+    <img src="figures/rate_distortion_qualitative.png" alt="Qualitative reconstruction comparison.">
+    <figcaption>Qualitative reconstructions on <em>cameraman</em> for OMP / FISTA / ADMM across the $\delta$ sweep.</figcaption>
+  </figure>
+
+  <h3>Donoho&ndash;Tanner phase transition <span class="pill">Exp. 1</span></h3>
+  <figure>
+    <img src="figures/phase_transition.png" alt="Empirical phase transition for OMP vs FISTA.">
+    <figcaption>
+      Both solvers exhibit a sharp empirical Donoho&ndash;Tanner transition.
+      <b>OMP wins at small $\delta$; FISTA wins at large $\delta$</b>; the
+      crossover sits near $\delta \approx 0.65$. Grid: 19&times;19, 20
+      trials per cell, $N{=}200$, zero noise.
+    </figcaption>
+  </figure>
+
+  <h3>LISTA at matched compute <span class="pill">Exp. 3</span></h3>
+  <figure>
+    <img src="figures/lista_comparison.png" alt="LISTA vs ISTA / FISTA at matched layer count.">
+    <figcaption>
+      A $K{=}10$-layer learned solver matches what FISTA needs
+      <b>22 iterations</b> to reach &mdash; a $\sim 2.2\times$ iteration
+      speedup at equivalent recovery quality.
+    </figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Solver</th><th>Validation NMSE @ $K=10$</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ISTA</td><td>0.4667</td></tr>
+        <tr><td>FISTA</td><td>0.3369</td></tr>
+        <tr><td>LISTA</td><td><b>0.0501</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Joint vs. sequential under an illumination gradient <span class="pill">Exp. 4 &middot; headline</span></h3>
+  <figure>
+    <img src="figures/joint_vs_sequential.png" alt="Joint vs sequential recovery PSNR by measurement rate.">
+    <figcaption>
+      Aggregate PSNR vs measurement rate for the joint and sequential
+      pipelines under an 8&times; horizontal illumination gradient. Both
+      curves are scored against the illumination-normalized scene.
+    </figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>$\delta$</th><th>cameraman</th><th>astronaut</th><th>coins</th><th>page</th><th>moon</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0.20</td><td><b>+2.87</b></td><td><b>+0.54</b></td><td>&minus;1.02</td><td>&minus;0.79</td><td>&minus;10.03</td></tr>
+        <tr><td>0.30</td><td><b>+4.65</b></td><td><b>+0.18</b></td><td>&minus;1.73</td><td>&minus;0.48</td><td>&minus;9.51</td></tr>
+        <tr><td>0.40</td><td><b>+1.13</b></td><td><b>+1.84</b></td><td><b>+0.39</b></td><td>&minus;0.23</td><td>&minus;7.76</td></tr>
+        <tr><td>0.50</td><td><b>+1.08</b></td><td><b>+2.31</b></td><td><b>+0.74</b></td><td><b>+0.74</b></td><td>&minus;9.05</td></tr>
+        <tr><td>0.60</td><td><b>+3.07</b></td><td><b>+2.21</b></td><td><b>+0.32</b></td><td><b>+0.43</b></td><td>&minus;8.37</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted);margin-top:4px">
+    Per-scene PSNR gain $\Delta = \text{joint} - \text{sequential}$ (dB).
+    Joint wins on textured scenes (cameraman, astronaut) and is a wash on
+    moderate-content scenes; on near-uniform <em>moon</em> the joint
+    $g$-update becomes rank-deficient and degrades by $\sim 8$&nbsp;dB.
+  </p>
+
+  <figure>
+    <img src="figures/joint_vs_sequential_qualitative.png" alt="Qualitative joint vs sequential reconstructions.">
+    <figcaption>Qualitative reconstructions for the joint and sequential pipelines on each test scene.</figcaption>
+  </figure>
+</section>
+
+<section id="summary">
+  <h2>Summary</h2>
+  <ul>
+    <li><b>Phase transition.</b> Sharp empirical Donoho&ndash;Tanner transition for both solvers; crossover near $\delta \approx 0.65$.</li>
+    <li><b>Rate&ndash;distortion.</b> FISTA / ADMM beat OMP by 2&ndash;3&nbsp;dB across the useful $\delta$ range.</li>
+    <li><b>LISTA.</b> A 10-layer learned solver matches FISTA at 22 iterations &mdash; $\sim 2.2\times$ iteration speedup.</li>
+    <li><b>Joint vs sequential.</b> Up to <b>+4.7&nbsp;dB</b> on textured scenes; catastrophic failure on near-uniform scenes is the most informative limitation.</li>
+  </ul>
+</section>
+
+<section id="paper">
+  <h2>Read the paper</h2>
+  <p>
+    <a href="paper/neurips_2026.pdf">Open in new tab</a> &middot;
+    <a href="paper/neurips_2026.pdf" download>Download PDF</a>
+  </p>
+  <iframe class="pdf-frame" src="paper/neurips_2026.pdf#view=FitH" title="Joint-CS paper PDF"></iframe>
+</section>
+
+<section id="poster-section">
+  <details>
+    <summary>Poster</summary>
+    <p style="margin-top:10px">
+      <a href="poster/poster.pdf">Open in new tab</a> &middot;
+      <a href="poster/poster.pdf" download>Download PDF</a>
+    </p>
+    <iframe class="pdf-frame" src="poster/poster.pdf#view=FitH" title="Joint-CS poster PDF"></iframe>
+  </details>
+</section>
+
+<section id="reproduce">
+  <h2>Reproducing the experiments</h2>
+  <pre><code>git clone https://github.com/farhansadeek/Snapshot-RAW-Enhance
+cd Snapshot-RAW-Enhance
+
+python3 experiments/phase_transition.py      # ~8 min CPU
+python3 experiments/rate_distortion.py       # ~12 s
+python3 experiments/train_lista.py           # ~4 min CPU
+python3 experiments/joint_vs_sequential.py   # ~5 s</code></pre>
+</section>
+
+<section id="bibtex">
+  <h2>BibTeX</h2>
+<pre><code>@misc{sadeek2026jointcs,
+  author       = {Farhan Sadeek},
+  title        = {{Joint-CS}: Simultaneous Illumination Normalization
+                  and Sparse Image Compression via Unfolded Recovery},
+  year         = {2026},
+  howpublished = {ENGS 109 final project,
+                  Thayer School of Engineering, Dartmouth College},
+  url          = {https://github.com/farhansadeek/Snapshot-RAW-Enhance}
+}</code></pre>
+</section>
+
+<footer>
+  <p>&copy; 2026 Farhan Sadeek &middot; Dartmouth College &middot; <a href="paper/neurips_2026.pdf">PDF</a> &middot; <a href="https://github.com/farhansadeek/Snapshot-RAW-Enhance">source</a></p>
+</footer>
+
+</main>
 </body>
 </html>
