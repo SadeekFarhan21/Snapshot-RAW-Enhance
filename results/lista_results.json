@@ -1,0 +1,13 @@
+{
+  "N": 200,
+  "M": 80,
+  "S": 10,
+  "snr_db": 30.0,
+  "n_layers": 10,
+  "lista_val_nmse": 0.05011851967941525,
+  "ista_at_K": 0.46665296930161304,
+  "fista_at_K": 0.33685645103953643,
+  "ista_converged": 0.004962543005557817,
+  "fista_converged": 0.004962542082573287,
+  "speedup_vs_fista_iters_for_matched_nmse": 22
+}
