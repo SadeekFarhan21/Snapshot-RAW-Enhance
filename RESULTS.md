@@ -46,34 +46,36 @@ gives OMP 0.30 success, FISTA 0.00; FISTA's shrinkage bias means it
 rarely clears the strict NMSE $< 10^{-3}$ bar even when the support is
 correct.
 
-## Experiment 2 — Rate-distortion on natural image
+## Experiment 2 — Rate-distortion on natural image set
 
-64×64 cameraman image, 16×16 blocks, DCT sparsifying basis, Gaussian
-sensing in pixel domain, additive Gaussian noise at SNR = 30 dB. PSNR
-and SSIM are reported on the reassembled image versus the original.
+5-image test set (cameraman, astronaut, coins, page, moon) from
+`skimage.data`, 64×64 grayscale, 16×16 blocks, DCT sparsifying basis,
+Gaussian sensing in pixel domain, additive Gaussian noise at SNR = 30 dB.
+PSNR and SSIM are reported as mean ± std across the test set so the
+result isn't a single-image artifact.
 
 - Figure: `figures/rate_distortion.png`, `figures/rate_distortion_qualitative.png`
 - Data:   `results/rate_distortion.json`
 
-**Findings.** PSNR (dB) on the reassembled cameraman image:
+**Findings.** PSNR (dB, mean ± std across 5 images):
 
 | $\delta$ | OMP | FISTA | ADMM |
 | :---: | :---: | :---: | :---: |
-| 0.10 | 15.19 | 15.78 | 10.73 |
-| 0.20 | 17.13 | 19.57 | 17.15 |
-| 0.30 | 20.10 | 22.19 | 21.51 |
-| 0.40 | 21.47 | 24.49 | 24.28 |
-| 0.50 | 22.84 | 25.46 | 25.76 |
-| 0.60 | 24.62 | 27.23 | 26.78 |
-| 0.70 | 26.22 | 27.96 | 28.23 |
+| 0.10 | 15.46 ± 4.4 | **16.67 ± 4.8** | 11.23 ± 3.1 |
+| 0.20 | 17.42 ± 4.3 | **19.39 ± 4.5** | 17.62 ± 4.8 |
+| 0.30 | 19.15 ± 4.0 | **21.73 ± 4.3** | 21.27 ± 4.6 |
+| 0.40 | 20.42 ± 3.7 | **23.64 ± 4.1** | 23.47 ± 4.4 |
+| 0.50 | 21.73 ± 3.2 | **25.06 ± 3.9** | 24.98 ± 4.0 |
+| 0.60 | 23.50 ± 3.0 | **26.43 ± 3.8** | 26.37 ± 3.9 |
+| 0.70 | 24.89 ± 3.0 | **27.57 ± 3.5** | 27.45 ± 3.7 |
 
 FISTA and ADMM track each other within $\sim 0.5$ dB once $\delta \ge 0.2$
-(they minimize the same Lasso objective; the small gap is due to fixed
-iteration budgets and $\rho$ tuning in ADMM). Both beat OMP by 2–3 dB at
+(they minimize the same Lasso objective). Both beat OMP by 2–3 dB at
 every $\delta \ge 0.2$. ADMM is the weakest at $\delta = 0.10$ because
-the design matrix becomes severely ill-conditioned and our fixed
-$\rho = 1.0$ is no longer well-matched. SSIM tells the same story
-(FISTA $\delta=0.5$: 0.71 vs. OMP 0.55).
+the design matrix becomes severely ill-conditioned and fixed $\rho = 1.0$
+is no longer well-matched. The $\sim 3$–$4$ dB std across scenes reflects
+per-image difficulty: `moon` is the easiest (low entropy, mostly black),
+`coins` is the hardest (textured, high spatial frequency).
 
 ## Experiment 3 — LISTA vs ISTA / FISTA at matched compute
 
@@ -108,8 +110,9 @@ best-checkpoint restore (epoch 17) neutralizes this.
 
 ## Experiment 4 — Joint vs sequential recovery under illumination gradient
 
-Synthetic "RAW-like" scene: a 16×16 patch of the cameraman image multiplied
-by a horizontal illumination gradient (factor of 8×). Gaussian CS at
+Per-scene ablation across 5 real natural images (cameraman, astronaut,
+coins, page, moon). Each scene is a 16×16 center patch, [0,1]-normalized,
+multiplied by a horizontal 8× illumination gradient. Gaussian CS at
 SNR = 25 dB, sweep over measurement rates.
 
 - **Sequential pipeline**: FISTA on the raw measurements in DCT domain,
@@ -124,28 +127,48 @@ scene — that is, what an ISP is _trying_ to produce.
 - Figure: `figures/joint_vs_sequential.png`, `figures/joint_vs_sequential_qualitative.png`
 - Data:   `results/joint_vs_sequential.json`
 
-**Findings.** PSNR (dB) / SSIM on the illumination-normalized scene:
+**Findings — scene-dependent.** Per-scene PSNR gain $\Delta = $ joint − seq (dB):
 
-| $\delta$ | seq. PSNR | joint PSNR | $\Delta$ | seq. SSIM | joint SSIM |
+| $\delta$ | cameraman | astronaut | coins | page | moon |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| 0.20 |  6.15 |  9.02 | **+2.87** | 0.024 | 0.231 |
-| 0.30 | 10.75 | 11.02 | +0.27 | 0.502 | 0.475 |
-| 0.40 | 11.24 | 12.65 | +1.41 | 0.538 | 0.569 |
-| 0.50 | 11.33 | 12.94 | +1.60 | 0.523 | 0.593 |
-| 0.60 | 11.72 | 14.16 | **+2.44** | 0.599 | 0.744 |
+| 0.20 | **+2.87** | **+0.54** |  −1.02 |  −0.79 | **−10.03** |
+| 0.30 | **+4.65** | **+0.18** |  −1.73 |  −0.48 |  −9.51 |
+| 0.40 | **+1.13** | **+1.84** | **+0.39** |  −0.23 |  −7.76 |
+| 0.50 | **+1.08** | **+2.31** | **+0.74** | **+0.74** |  −9.05 |
+| 0.60 | **+3.07** | **+2.21** | **+0.32** | **+0.43** |  −8.37 |
 
-Joint recovery dominates at every measurement rate, with the largest
-gains ($+2.4$ to $+2.9$ dB) at the noise- and undersampling-limited
-extremes. The sequential pipeline plateaus around 11–12 dB because its
-post-hoc column-mean illumination estimate is computed on an already-
-biased FISTA reconstruction; once the sparse recovery has clipped the
-dark-side coefficients, no downstream gain correction can restore them.
-The joint formulation feeds the current illumination estimate back into
-the sensing operator so that FISTA's $\ell_1$ regularization is applied
-to the *normalized* coefficients, not to a gradient-distorted version of
-them — this is the mechanism behind the 0.74 vs. 0.60 SSIM at $\delta =
-0.60$, where the qualitative figure shows visibly less wash-out on the
-bright side and less crush on the dark side.
+Aggregated (PSNR mean ± std, dB):
+
+| $\delta$ | all 5 (seq) | all 5 (joint) | no-moon (seq) | no-moon (joint) |
+| :---: | :---: | :---: | :---: | :---: |
+| 0.20 | **10.72 ± 3.4** |  9.03 ± 1.6 |  9.23 ± 1.8 | **9.64 ± 1.1** |
+| 0.30 | **11.65 ± 3.8** | 10.27 ± 1.5 | 10.14 ± 2.5 | **10.79 ± 1.2** |
+| 0.40 | **12.51 ± 2.3** | 11.59 ± 1.6 | 11.39 ± 0.7 | **12.17 ± 1.3** |
+| 0.50 | **13.59 ± 2.4** | 12.76 ± 2.0 | 12.42 ± 0.6 | **13.64 ± 1.1** |
+| 0.60 | **13.40 ± 2.4** | 12.94 ± 2.0 | 12.30 ± 1.0 | **13.81 ± 1.1** |
+
+**Three regimes.** (1) *Joint wins on textured scenes* (cameraman +1.1 to
++4.7 dB; astronaut +0.2 to +2.3 dB) — the regime the method was designed
+for. (2) *Joint is a wash on moderate-content scenes* (coins, page:
+±1.7 dB; clearly positive once $\delta \ge 0.4$). (3) *Joint
+catastrophically fails on near-uniform scenes* (moon: −7.8 to −10.0 dB).
+
+**Mechanism behind the moon failure.** Moon's center patch is mostly
+black sky. After [0,1] normalization and 8× gradient multiplication,
+most columns of the raw signal carry near-zero energy, so the
+$\boldsymbol{B}^\top \boldsymbol{B}$ matrix in the $\boldsymbol{g}$-update
+is severely rank-deficient and the per-column gains are non-identifiable.
+The block-coordinate alternation then drives $\boldsymbol{g}$ toward a
+high-variance solution that explains the noise rather than the absent
+signal. Sequential avoids this because it never tries to estimate
+$\boldsymbol{g}$ from the measurements — its column-mean divisor is
+essentially a copy of the gradient, applied unconditionally. When the
+underlying scene is too sparse to identify $\boldsymbol{g}$, refusing to
+estimate it is a virtue.
+
+The takeaway: a deployed Joint-CS pipeline should gate on a conditioning
+check ($\kappa(\boldsymbol{B}^\top\boldsymbol{B})$ below a threshold) and
+fall back to sequential when the scene is too uniform.
 
 ## Summary
 
@@ -158,11 +181,13 @@ bright side and less crush on the dark side.
 - **LISTA (Exp. 3).** A 10-layer learned solver matches what FISTA needs
   22 iterations to reach (NMSE = 0.05), a $\sim 2.2\times$ iteration
   speedup at the same recovery quality.
-- **Joint vs sequential (Exp. 4).** The joint $(c, g)$ formulation
-  outperforms a sequential CS-then-illumination-correct baseline by
-  1.4–2.9 dB across measurement rates under a $8\times$ horizontal
-  illumination gradient at SNR = 25 dB. This is the project's headline
-  result.
+- **Joint vs sequential (Exp. 4).** Scene-dependent. Joint wins on
+  textured scenes by up to +4.7 dB (cameraman, astronaut), is a wash on
+  moderate-content scenes (coins, page), and fails catastrophically on
+  the near-uniform `moon` scene (−7.8 to −10.0 dB) because of
+  $\boldsymbol{g}$-update rank-deficiency. Excluding moon, joint wins
+  by +0.4 to +1.5 dB at every $\delta$. This is the project's headline
+  result — and its most informative limitation.
 
 ## How to reproduce
 

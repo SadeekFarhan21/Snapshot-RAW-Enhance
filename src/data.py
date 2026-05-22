@@ -25,6 +25,32 @@ def standard_image(size: int = 128) -> np.ndarray:
     return img_as_float(img).astype(np.float64)
 
 
+def test_image_set(size: int = 64) -> list[tuple[str, np.ndarray]]:
+    """Small set of real natural images for averaged evaluation.
+
+    Uses scikit-image's bundled photos — these are real captures (not
+    synthetic patterns), span a range of content (faces, text, coins, moon,
+    cameraman), and ship with the library so no download is needed. Each
+    image is converted to grayscale, resized to `size x size`, and rescaled
+    to [0, 1]. Returns a list of (name, image) tuples so downstream code can
+    log per-image numbers in addition to aggregates.
+    """
+    raw = {
+        "cameraman": skdata.camera(),
+        "astronaut": color.rgb2gray(skdata.astronaut()),
+        "coins":     skdata.coins(),
+        "page":      skdata.page(),
+        "moon":      skdata.moon(),
+    }
+    out: list[tuple[str, np.ndarray]] = []
+    for name, img in raw.items():
+        img = transform.resize(img, (size, size), anti_aliasing=True)
+        img = img_as_float(img).astype(np.float64)
+        img = (img - img.min()) / (img.max() - img.min() + 1e-8)
+        out.append((name, img))
+    return out
+
+
 def hdr_like_image(size: int = 128, dynamic_range: float = 50.0) -> np.ndarray:
     """Synthetic 'RAW-like' image: standard scene with a strong illumination gradient.
 

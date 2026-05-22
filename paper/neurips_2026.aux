@@ -1,8 +1,8 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyField@AuxAddToFields[1]{}
-\providecommand\HyField@AuxAddToCoFields[2]{}
+\providecommand*\HyPL@Entry[1]{}
 \citation{candes2006stable,donoho2006compressed}
+\HyPL@Entry{0<</S/D>>}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
 \newlabel{eq:image-formation}{{1}{1}{Introduction}{equation.1.1}{}}
@@ -24,8 +24,8 @@
 \@writefile{toc}{\contentsline {paragraph}{OMP.}{2}{section*.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{ISTA / FISTA.}{2}{section*.3}\protected@file@percent }
 \newlabel{eq:ista}{{6}{2}{ISTA / FISTA}{equation.2.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{ADMM.}{2}{section*.4}\protected@file@percent }
 \citation{gregor2010lista}
+\@writefile{toc}{\contentsline {paragraph}{ADMM.}{3}{section*.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Joint-CS}{3}{section.3}\protected@file@percent }
 \newlabel{sec:method}{{3}{3}{Joint-CS}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Image-formation model with illumination}{3}{subsection.3.1}\protected@file@percent }
@@ -48,41 +48,44 @@
 \newlabel{sec:phase}{{4.2}{4}{Phase transition}{subsection.4.2}{}}
 \@writefile{toc}{\contentsline {paragraph}{Protocol.}{4}{section*.9}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Results.}{4}{section*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Rate-distortion on a natural image}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Rate-distortion on a multi-image natural-scene set}{4}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Protocol.}{4}{section*.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results.}{4}{section*.12}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Rate-distortion (PSNR, dB) on the $64{\times }64$ cameraman image, SNR$=30$~dB. FISTA and ADMM agree to within $\sim 0.5$~dB above $\delta {=}0.2$; both dominate OMP by $2$--$3$~dB.}}{5}{table.2}\protected@file@percent }
-\newlabel{tab:rd}{{2}{5}{Rate-distortion (PSNR, dB) on the $64{\times }64$ cameraman image, SNR$=30$~dB. FISTA and ADMM agree to within $\sim 0.5$~dB above $\delta {=}0.2$; both dominate OMP by $2$--$3$~dB}{table.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Rate-distortion curves on the cameraman image at SNR${=}30$~dB. Left: PSNR vs.\ measurement rate $\delta $. Right: SSIM. FISTA and ADMM are essentially tied above $\delta {=}0.2$; OMP trails by $2$--$3$~dB.}}{5}{figure.2}\protected@file@percent }
-\newlabel{fig:rd}{{2}{5}{Rate-distortion curves on the cameraman image at SNR${=}30$~dB. Left: PSNR vs.\ measurement rate $\delta $. Right: SSIM. FISTA and ADMM are essentially tied above $\delta {=}0.2$; OMP trails by $2$--$3$~dB}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Rate-distortion (PSNR, dB) on the $5$-image natural-scene set, SNR${=}30$~dB. Mean~$\pm $~standard deviation across the test set. FISTA and ADMM agree within $\sim 0.5$~dB above $\delta {=}0.2$; both dominate OMP by $2$--$3$~dB.}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:rd}{{2}{5}{Rate-distortion (PSNR, dB) on the $5$-image natural-scene set, SNR${=}30$~dB. Mean~$\pm $~standard deviation across the test set. FISTA and ADMM agree within $\sim 0.5$~dB above $\delta {=}0.2$; both dominate OMP by $2$--$3$~dB}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Rate-distortion curves on the $5$-image natural-scene set at SNR${=}30$~dB. Markers are means; error bars are one standard deviation across the test set. Left: PSNR vs.\ measurement rate $\delta $. Right: SSIM. FISTA and ADMM are essentially tied above $\delta {=}0.2$; OMP trails by $2$--$3$~dB. The wide error bars (\textasciitilde $3$--$4$~dB) reflect per-scene difficulty---moon is easy, coins is hard.}}{5}{figure.2}\protected@file@percent }
+\newlabel{fig:rd}{{2}{5}{Rate-distortion curves on the $5$-image natural-scene set at SNR${=}30$~dB. Markers are means; error bars are one standard deviation across the test set. Left: PSNR vs.\ measurement rate $\delta $. Right: SSIM. FISTA and ADMM are essentially tied above $\delta {=}0.2$; OMP trails by $2$--$3$~dB. The wide error bars (\textasciitilde $3$--$4$~dB) reflect per-scene difficulty---moon is easy, coins is hard}{figure.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Results.}{5}{section*.12}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}LISTA vs.\ classical solvers at matched compute}{5}{subsection.4.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Protocol.}{5}{section*.13}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Results.}{5}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Joint vs.\ sequential recovery under illumination gradient}{5}{subsection.4.5}\protected@file@percent }
-\newlabel{sec:joint-vs-seq}{{4.5}{5}{Joint vs.\ sequential recovery under illumination gradient}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Joint vs.\ sequential recovery under illumination gradient: a scene-dependent ablation}{5}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:joint-vs-seq}{{4.5}{5}{Joint vs.\ sequential recovery under illumination gradient: a scene-dependent ablation}{subsection.4.5}{}}
 \@writefile{toc}{\contentsline {paragraph}{Protocol.}{5}{section*.15}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Validation NMSE at matched layer / iteration count. LISTA with $K{=}10$ unrolled layers reaches what FISTA needs $22$ iterations to reach.}}{6}{table.3}\protected@file@percent }
 \newlabel{tab:lista}{{3}{6}{Validation NMSE at matched layer / iteration count. LISTA with $K{=}10$ unrolled layers reaches what FISTA needs $22$ iterations to reach}{table.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Left: LISTA training and validation curves; best validation NMSE was reached at epoch $17$ and the model was restored from that checkpoint. Right: validation NMSE vs.\ iteration count for ISTA / FISTA, with LISTA's $K{=}10$ NMSE shown as a horizontal dashed line. FISTA needs $\sim 22$ iterations to match.}}{6}{figure.3}\protected@file@percent }
 \newlabel{fig:lista}{{3}{6}{Left: LISTA training and validation curves; best validation NMSE was reached at epoch $17$ and the model was restored from that checkpoint. Right: validation NMSE vs.\ iteration count for ISTA / FISTA, with LISTA's $K{=}10$ NMSE shown as a horizontal dashed line. FISTA needs $\sim 22$ iterations to match}{figure.3}{}}
 \@writefile{toc}{\contentsline {paragraph}{Results.}{6}{section*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Ablation discussion}{6}{subsection.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion and Future Work}{6}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Mechanism.}{6}{section*.17}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Per-scene PSNR gain $\Delta = \text  {PSNR}_\text  {joint} - \text  {PSNR}_\text  {seq}$ (dB) under the $8\times $ illumination gradient, SNR${=}25$~dB. Joint wins on textured scenes (cameraman, astronaut), is roughly a wash on moderate-content scenes (coins, page), and loses catastrophically on the near-uniform scene (moon).}}{7}{table.4}\protected@file@percent }
+\newlabel{tab:joint-perscene}{{4}{7}{Per-scene PSNR gain $\Delta = \text {PSNR}_\text {joint} - \text {PSNR}_\text {seq}$ (dB) under the $8\times $ illumination gradient, SNR${=}25$~dB. Joint wins on textured scenes (cameraman, astronaut), is roughly a wash on moderate-content scenes (coins, page), and loses catastrophically on the near-uniform scene (moon)}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Joint vs.\ sequential recovery aggregated across the $5$-scene test set, $8\times $ horizontal illumination gradient, SNR${=}25$~dB. The full-set mean is dragged down by the \emph  {moon} outlier; excluding moon, joint wins by $+0.4$ to $+1.5$~dB at every $\delta $. See Table~\ref {tab:joint-perscene} for the per-scene breakdown.}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:joint}{{5}{7}{Joint vs.\ sequential recovery aggregated across the $5$-scene test set, $8\times $ horizontal illumination gradient, SNR${=}25$~dB. The full-set mean is dragged down by the \emph {moon} outlier; excluding moon, joint wins by $+0.4$ to $+1.5$~dB at every $\delta $. See Table~\ref {tab:joint-perscene} for the per-scene breakdown}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Ablation discussion}{7}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion and Future Work}{7}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limitations.}{7}{section*.18}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Joint vs.\ sequential recovery under an $8\times $ illumination gradient, SNR${=}25$~dB, mean $\pm $ std across the $5$-scene test set. Left: PSNR. Right: SSIM. The full-set mean is dragged below sequential by the \emph  {moon} outlier (Table~\ref {tab:joint-perscene}); excluding moon, joint dominates at every $\delta $ (Table~\ref {tab:joint}).}}{8}{figure.4}\protected@file@percent }
+\newlabel{fig:joint}{{4}{8}{Joint vs.\ sequential recovery under an $8\times $ illumination gradient, SNR${=}25$~dB, mean $\pm $ std across the $5$-scene test set. Left: PSNR. Right: SSIM. The full-set mean is dragged below sequential by the \emph {moon} outlier (Table~\ref {tab:joint-perscene}); excluding moon, joint dominates at every $\delta $ (Table~\ref {tab:joint})}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Qualitative reconstructions on the $16{\times }16$ scene. Top: ground-truth scene at each measurement rate. Middle: sequential pipeline (FISTA-then-correct). Bottom: Joint-CS. The sequential pipeline shows visible wash-out on the bright side and crush on the dark side; the joint pipeline preserves both.}}{8}{figure.5}\protected@file@percent }
+\newlabel{fig:joint-qual}{{5}{8}{Qualitative reconstructions on the $16{\times }16$ scene. Top: ground-truth scene at each measurement rate. Middle: sequential pipeline (FISTA-then-correct). Bottom: Joint-CS. The sequential pipeline shows visible wash-out on the bright side and crush on the dark side; the joint pipeline preserves both}{figure.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Future work.}{8}{section*.19}\protected@file@percent }
 \bibcite{beck2009fast}{{1}{}{{}}{{}}}
 \bibcite{boyd2011distributed}{{2}{}{{}}{{}}}
 \bibcite{candes2006stable}{{3}{}{{}}{{}}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Joint vs.\ sequential recovery on a $16{\times }16$ scene under an $8\times $ horizontal illumination gradient, SNR${=}25$~dB. PSNR / SSIM are on the illumination-normalized scene. Joint wins at every $\delta $, with the largest absolute gains at the noise- and undersampling-limited extremes.}}{7}{table.4}\protected@file@percent }
-\newlabel{tab:joint}{{4}{7}{Joint vs.\ sequential recovery on a $16{\times }16$ scene under an $8\times $ horizontal illumination gradient, SNR${=}25$~dB. PSNR / SSIM are on the illumination-normalized scene. Joint wins at every $\delta $, with the largest absolute gains at the noise- and undersampling-limited extremes}{table.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Joint vs.\ sequential recovery under an $8\times $ illumination gradient, SNR${=}25$~dB. Left: PSNR on the scene vs.\ measurement rate. Right: SSIM. Joint (squares) dominates sequential (circles) at every $\delta $.}}{7}{figure.4}\protected@file@percent }
-\newlabel{fig:joint}{{4}{7}{Joint vs.\ sequential recovery under an $8\times $ illumination gradient, SNR${=}25$~dB. Left: PSNR on the scene vs.\ measurement rate. Right: SSIM. Joint (squares) dominates sequential (circles) at every $\delta $}{figure.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Limitations.}{7}{section*.17}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Future work.}{7}{section*.18}\protected@file@percent }
 \bibcite{donoho2006compressed}{{4}{}{{}}{{}}}
 \bibcite{donoho2009observed}{{5}{}{{}}{{}}}
 \bibcite{gregor2010lista}{{6}{}{{}}{{}}}
 \bibcite{tropp2007signal}{{7}{}{{}}{{}}}
 \providecommand\NAT@force@numbers{}\NAT@force@numbers
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Qualitative reconstructions on the $16{\times }16$ scene. Top: ground-truth scene at each measurement rate. Middle: sequential pipeline (FISTA-then-correct). Bottom: Joint-CS. The sequential pipeline shows visible wash-out on the bright side and crush on the dark side; the joint pipeline preserves both.}}{8}{figure.5}\protected@file@percent }
-\newlabel{fig:joint-qual}{{5}{8}{Qualitative reconstructions on the $16{\times }16$ scene. Top: ground-truth scene at each measurement rate. Middle: sequential pipeline (FISTA-then-correct). Bottom: Joint-CS. The sequential pipeline shows visible wash-out on the bright side and crush on the dark side; the joint pipeline preserves both}{figure.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Reproducibility}{8}{appendix.A}\protected@file@percent }
-\gdef \@abspage@last{8}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Reproducibility}{9}{appendix.A}\protected@file@percent }
+\gdef \@abspage@last{9}

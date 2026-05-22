@@ -1,0 +1,641 @@
+% Poster: Learnable Path-Complex Features and Unified Path-Cellular
+% Message Passing for Link Prediction
+% Dimensions: 48 in (wide) x 36 in (high), landscape.
+
+\documentclass[final]{beamer}
+
+% ====================
+% Packages
+% ====================
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+% 48 in x 36 in  ==  121.92 cm x 91.44 cm  (landscape)
+\usepackage[size=custom,width=121.92,height=91.44,scale=1.05]{beamerposter}
+\usetheme{thayer}
+\usecolortheme{thayer}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.14}
+\usepackage{anyfontsize}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+% Shrink the headline title so it fits on a SINGLE line without
+% colliding with the Dartmouth Engineering logo at the top-right
+% of the page.
+\setbeamerfont{headline title}{size={\fontsize{52}{60}\selectfont},series=\bfseries}
+\setbeamerfont{headline author}{size=\large}
+\setbeamerfont{headline institute}{size=\small}
+
+% ====================
+% Lengths
+% ====================
+
+\newlength{\sepwidth}
+\newlength{\colwidth}
+\setlength{\sepwidth}{0.022\paperwidth}
+\setlength{\colwidth}{0.225\paperwidth}
+
+\newcommand{\separatorcolumn}{
+  \begin{column}{\sepwidth}
+\end{column}}
+
+% ====================
+% Title
+% ====================
+
+\title{Learnable Path-Complex Features and Unified Path--Cellular Message Passing for Link Prediction}
+
+\author{Farhan Sadeek\inst{1} \and Sie Hendrata Dharmawan\inst{1} \and Peter Chin\inst{1}}
+
+\institute[Dartmouth]{\inst{1} Thayer School of Engineering, Dartmouth College, Hanover, NH 03755, USA}
+
+% ====================
+% Footer
+% ====================
+
+\footercontent{
+  Path Complex Networks: Topological Deep Learning \hfill
+  Dartmouth College, Thayer School of Engineering \hfill
+\href{mailto:farhan.sadeek.29@dartmouth.edu}{farhan.sadeek.29@dartmouth.edu}}
+
+% ====================
+% Body
+% ====================
+
+\begin{document}
+
+\begin{frame}[t]
+  \begin{columns}[t]
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 1 -- Motivation, Background, Problem
+    % ============================================================
+    \begin{column}{\colwidth}
+
+      \begin{block}{Motivation}
+
+        \textbf{1-WL bounds plain GNNs} \citep{xu_how_2019}. Topological
+        lifts escape it by message-passing over a richer object:
+      \begin{itemize}\setlength{\itemsep}{0.15em}
+          \item \textbf{MPSN} \citep{bodnar_weisfeiler_2021}: biased to \emph{cliques}.
+          \item \textbf{CWN} \citep{bodnar_weisfeiler_2022}: biased to \emph{induced cycles}.
+          \item \textbf{PCN} \citep{truong_weisfeiler_2024}: simple paths, no substructure bias.
+        \end{itemize}
+
+        \medskip
+        \textbf{PCN leaves two problems on the table:}
+      \begin{enumerate}\setlength{\itemsep}{0.15em}
+          \item Symmetric scatter-sum init forces
+            $A{\to}B{\to}C$ and $C{\to}B{\to}A$ to receive \emph{identical}
+            embeddings.
+          \item Lift is monolithic: paths \emph{or} rings.
+            Link prediction needs the closed-cycle signal that paths
+            alone discard.
+        \end{enumerate}
+
+      \end{block}
+
+      \medskip
+
+      \begin{alertblock}{Our Contributions}
+
+      \begin{enumerate}\setlength{\itemsep}{0.2em}
+          \item \textbf{Position-aware learnable init.} $k{+}1$ position-specific
+            linear maps per $k$-cell: strictly subsumes the scatter-sum
+            and breaks orientation symmetry at $t{=}0$.
+          \item \textbf{Unified path and cellular complex.} Path- and ring-cells
+            coexist at dim~2; canonicalised edges route messages between
+            them for free.
+          \item \textbf{Theory (U-PWL).} U-PWL\,$\geq$\,PWL \emph{and} U-PWL\,$\geq$\,CWL(\textit{k}-IC); strictly $>$ 1-WL.
+          \item \textbf{Cora ablation, 10 seeds.} Each modification cuts seed
+            variance; unified lift achieves the best mean test AUC.
+        \end{enumerate}
+
+      \end{alertblock}
+
+      \medskip
+
+      \begin{exampleblock}{Big Takeaway}
+
+        \large
+        \textbf{Unified path- and ring-cells with a learnable,
+          order-aware init give PCN strictly greater expressivity and the
+        best Cora AUC --- at \emph{zero} kernel-level cost.}
+
+        \medskip\normalsize
+      \begin{itemize}\setlength{\itemsep}{0.15em}
+          \item \textbf{Greater expressivity:} proved via U-PWL theory.
+          \item \textbf{Lower variance:} $-31\%$ test-AUC std across 10 seeds.
+          \item \textbf{Zero kernel cost:} same MP architecture as PCN.
+        \end{itemize}
+
+      \end{exampleblock}
+
+      \medskip
+
+      \begin{block}{Background: Path Complexes}
+
+        A \emph{simple $k$-path} is an ordered tuple
+        $\sigma=(v_0,\ldots,v_k)$ of distinct vertices with
+        $\{v_i,v_{i+1}\}\!\in\!\mathcal E$; write $P_k(G)$ for the
+        full set. The boundary alternates end-deletion,
+        $\partial\,e_{i_0\ldots i_p}=\sum_{q}(-1)^q\,e_{i_0\ldots\hat{i}_q\ldots i_p}$
+        \citep{grigoryan_homologies_2013}, and PCN message-passes over
+        the faces $\mathcal B(\sigma)$ together with the upper
+        adjacencies $\mathcal N_\uparrow(\sigma)$.
+
+        \medskip
+        \centering
+        \includegraphics[width=0.55\colwidth]{../paper/path_complex_illustration.pdf}
+        {\footnotesize\\$\mathcal S_2\subset\mathcal A_2$: path complexes
+        strictly enrich the 2-cell vocabulary.}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{The Deterministic-Init Problem}
+
+        PCN initialises cell features by a symmetric aggregation,
+        $h_\sigma^{(0)}=\bigoplus_{v\in\sigma}x_v$ with
+        $\oplus\!\in\!\{\text{sum},\text{mean}\}$
+        \citep{truong_weisfeiler_2024}, which immediately collapses
+        orientation: $h_{(A,B,C)}^{(0)}=h_{(C,B,A)}^{(0)}$. The damage
+        is permanent, since later permutation-invariant aggregation also
+        discards the signed boundary, so the source/target asymmetry
+        that link decoders rely on is erased before message passing
+        even starts.
+
+      \end{block}
+
+    \end{column}
+
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 2 -- Notation + Method 1 + Method 2
+    % ============================================================
+    \begin{column}{\colwidth}
+
+      \begin{block}{Notation}
+
+        \begin{tabular}{@{}l@{\hspace{0.9em}}l@{}}
+          $P_k(G),R_L(G)$ & $k$-paths;\,induced cycles \\
+          $\sigma=(v_0,\ldots,v_k)$ & ordered $k$-cell \\
+          $\mathcal B,\mathcal N_\uparrow$ & faces; upper-adjacents \\
+          $W_i^{(k)}$ & pos.-aware init weight \\
+          $\mathcal C(G)$ & unified path and ring complex \\
+        \end{tabular}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Method 1: Position-Aware Learnable Init}
+
+        \textbf{Replace} the scatter-sum with $k{+}1$ position-specific maps:
+        \[
+          \boxed{\;
+            h_\sigma^{(0)} \;=\; \sum_{i=0}^{k} W_i^{(k)}\,x_{v_i}
+          \;}
+        \]
+        Each node contributes once per cell, so the asymptotic cost is
+        unchanged. Sharing $W_i^{(k)}=W$ recovers a linear projection
+        of the scatter-sum, so the new init strictly subsumes the
+        deterministic one; for unequal weights, paths $\sigma\neq\sigma'$
+        with the same multi-set of endpoints receive \emph{distinct}
+        features, something no symmetric $\bigoplus$ can produce. The
+        first vs.\ last endpoint encodes source vs.\ target, exactly
+        the asymmetry link decoders already exploit. The price is
+        $(k{+}1)\,d\,d_{\!\textrm{in}}$ parameters per $k$-cell ($d{=}64$
+        here); the init still runs in $\mathcal O(|P_k|\,d)$.
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Method 2: Unified Path and Cellular Complex}
+
+        Stack ring-cells \emph{on top of} the path complex at dim~2:
+        \[
+          \mathcal C_2(G)\;=\;\underbrace{P_2(G)}_{\text{2-paths}}\;\cup\;
+          \underbrace{R_L(G)}_{\text{induced cycles},\,L\leq 7}
+        \]
+        Path- and ring-cells have different boundary rules but share a
+        single edge representation: a ring and a path on the same edge
+        resolve to the \emph{same} canonical edge cell, so
+        upper-adjacency mixes ring\,$\leftrightarrow$\,path messages
+        for free.
+
+        \medskip
+        \begin{figure}
+          \centering
+          \begin{tikzpicture}[
+              scale=1.25,
+              vx/.style={circle, draw=black, very thick, fill=white,
+              minimum size=12mm, inner sep=0pt, font=\large\bfseries},
+              edge/.style={very thick, draw=black!75},
+              ringfill/.style={fill=orange!45, draw=none, opacity=0.7},
+              pathedge/.style={line width=1.2mm, draw=blue!65!black,
+                -{Stealth[length=4mm,width=3mm]},
+              shorten >=2pt, shorten <=2pt},
+              panel/.style={font=\normalsize\bfseries}
+            ]
+            % ============ (a) original graph ============
+            \node[vx] (A)  at (-1.5,  1.5) {A};
+            \node[vx] (B)  at ( 1.5,  1.5) {B};
+            \node[vx] (C)  at ( 1.5, -1.5) {C};
+            \node[vx] (D)  at (-1.5, -1.5) {D};
+            \draw[edge] (A) -- (B); \draw[edge] (B) -- (C);
+            \draw[edge] (C) -- (D); \draw[edge] (D) -- (A);
+            \draw[edge] (A) -- (C);
+            \node[panel] at (0, -3.0) {(a) graph $G$};
+
+            % ============ (b) path + ring at dim 2 ============
+            \begin{scope}[xshift=8cm]
+              \fill[ringfill] (-1.5, 1.5) -- (1.5, 1.5) -- (1.5, -1.5) -- cycle;
+              \draw[edge] (-1.5,-1.5) -- ( 1.5,-1.5);
+              \draw[edge] (-1.5,-1.5) -- (-1.5, 1.5);
+              \draw[edge] (-1.5, 1.5) -- ( 1.5,-1.5);
+              \draw[pathedge] (-1.5, 1.5) -- ( 1.5, 1.5);
+              \draw[pathedge] ( 1.5, 1.5) -- ( 1.5,-1.5);
+              \node[vx] (A2) at (-1.5,  1.5) {A};
+              \node[vx] (B2) at ( 1.5,  1.5) {B};
+              \node[vx] (C2) at ( 1.5, -1.5) {C};
+              \node[vx] (D2) at (-1.5, -1.5) {D};
+              \node[panel] at (0, -3.0) {(b) $\mathcal{C}_2$: path \emph{and} ring};
+            \end{scope}
+          \end{tikzpicture}
+          \caption{\textbf{Unified path and cellular complex.} On triangle
+            $ABC$, the \textcolor{orange!75!black}{\textbf{ring-cell}} (orange fill)
+            and the \textcolor{blue!70!black}{\textbf{path-cell}} $A{\to}B{\to}C$
+            (blue arrows) coexist and share edges $AB$, $BC$ via
+            canonicalised IDs, so $\mathcal N_\uparrow$ routes
+          messages between them at zero kernel cost.}
+          \label{fig:unified}
+        \end{figure}
+
+        \heading{Why this targets link prediction}
+
+        Common neighbours and short cycles drive link prediction
+        (Adamic--Adar, SEAL). Path-cells expose only the \emph{open}
+        neighbourhoods of $(u,v)$, whereas ring-cells expose the
+        \emph{closed} ones, supplying exactly the signal that
+        path-only PCN misses.
+
+        \medskip
+        \heading{Boundary rules differ; adjacency unifies}
+
+        The path boundary is the signed alternating end-deletion
+        $\partial(v_0,\!\ldots\!,v_k)\!=\!\sum_q(-1)^q(v_0,\!\ldots\!,\hat v_q,\!\ldots\!,v_k)$,
+        while the ring boundary collects the cycle's edges unsigned
+        (the standard cellular $\partial_2$). Both reduce to the
+        \emph{same} canonical edge IDs, so a single
+        $\mathcal N_\uparrow$ graph carries both kinds of message
+        with no extra MP kernel. On Cora this adds $+26\%$ dim-2
+        cells; each triangle contributes $1$ ring and $3$ paths, so
+        rings supply the triadic-closure signal that paths alone
+        cannot encode.
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Construction Recipe}
+
+      \begin{enumerate}\setlength{\itemsep}{0.18em}
+          \item Enumerate $P_2(G)$ and $R_{\leq 7}(G)$ separately
+            (one-off preprocessing).
+          \item Canonicalise every edge by sorting endpoint pairs; this is
+            the \emph{single} representation any 1-cell receives.
+          \item Build boundary and upper-adjacency tensors over the
+            merged dim-2 set $\mathcal C_2(G)=P_2\cup R_{\leq 7}$.
+          \item Run standard PCN message passing; the position-aware
+            init keeps orientation through every layer.
+        \end{enumerate}
+
+      \end{block}
+
+    \end{column}
+
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 3 -- Worked Example + Architecture + Theory
+    % ============================================================
+    \begin{column}{\colwidth}
+
+      \begin{block}{Worked Example: Symmetry Breaking}
+
+        Take graph $G$: $a{-}b{-}c$ with one-hot features
+        $x_a{=}e_1,\,x_b{=}e_2,\,x_c{=}e_3$.
+        Compare reversed paths $\sigma{=}(a,b,c)$ and $\sigma'{=}(c,b,a)$.
+
+        \medskip
+        \textbf{Deterministic init} collapses orientation:
+        \[
+          h_\sigma^{(0)} \;=\; e_1{+}e_2{+}e_3 \;=\; h_{\sigma'}^{(0)}.
+        \]
+
+        \medskip
+        \textbf{Learnable init} with
+        $W_0^{(2)}{=}I,\;W_1^{(2)}{=}\mathbf 0,\;W_2^{(2)}{=}2I$:
+        \begin{align*}
+          h_\sigma^{(0)}    &= I\,e_1 + \mathbf 0\,e_2 + 2I\,e_3
+          \;=\; e_1 + 2\,e_3,\\
+          h_{\sigma'}^{(0)} &= I\,e_3 + \mathbf 0\,e_2 + 2I\,e_1
+          \;=\; e_3 + 2\,e_1\;\neq\;h_\sigma^{(0)}.
+        \end{align*}
+
+        \medskip
+        Orientation therefore \textbf{survives} initialization and
+        flows through every later message-passing step.
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Encoder $\to$ Decoder Pipeline}
+
+        \begin{figure}
+          \centering
+          \begin{tikzpicture}[
+              xscale=1.25,
+              every node/.style={font=\footnotesize},
+              dimbox/.style={rounded corners=2pt, draw=black!60,
+                minimum width=3.2cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              dim0/.style={dimbox, fill=blue!10,   draw=blue!55!black},
+              dim1/.style={dimbox, fill=green!10,  draw=green!55!black},
+              dim2/.style={dimbox, fill=orange!18, draw=orange!75!black},
+              mp/.style={rounded corners=4pt, draw=black!80, very thick,
+                fill=yellow!12, minimum width=3.2cm, minimum height=1.0cm,
+              font=\footnotesize\bfseries, align=center},
+              dec/.style={rounded corners=4pt, draw=red!70!black, very thick,
+                fill=red!8, minimum width=3.2cm, minimum height=1.0cm,
+              font=\footnotesize\bfseries, align=center},
+              flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
+            ]
+            \node[dim0] (x0) at (0, 1.4) {nodes $x_v$};
+            \node[dim1] (x1) at (0, 0.0) {edges $P_1$};
+            \node[dim2] (x2) at (0,-1.4) {$P_2\!\cup\!R_L$};
+            \node[mp]   (mp1) at (4.4, 0.0) {PCN layer\\\#1};
+            \node[mp]   (mp2) at (8.0, 0.0) {PCN layer\\\#2};
+            \node[dim0] (z)   at (11.6, 0.0) {$z\!\in\!\mathbb R^{|\mathcal V|\!\times\! d}$};
+            \node[dec]  (dec) at (15.2, 0.0) {$\hat y_{uv}\!=\!z_u^{\!\top}z_v$};
+
+            \draw[flowarr] (x0)--(mp1.west);
+            \draw[flowarr] (x1)--(mp1.west);
+            \draw[flowarr] (x2)--(mp1.west);
+            \draw[flowarr] (mp1)--(mp2);
+            \draw[flowarr] (mp2)--(z);
+            \draw[flowarr] (z)--(dec);
+
+            \node[font=\scriptsize, anchor=north, text=black!65] at (1.2,-2.1)
+            {pos.-aware / linear init};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (6.2,-2.1)
+            {bnd, $\mathcal N_\uparrow$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (13.4,-2.1)
+            {BCE, 1:1 negs};
+          \end{tikzpicture}
+          \caption{Cell features (dim-0,1,2) are initialised (linear
+            for nodes, \emph{position-aware} for paths and rings) and
+            refined by two PCN message-passing layers; the node-level
+          output feeds a dot-product link decoder trained with BCE.}
+        \end{figure}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Message Passing on the Unified Complex}
+
+        Each layer aggregates boundaries and upper-adjacent cells:
+        {\small
+          \begin{align*}
+            m_\mathcal B(\sigma) &= \sum_{\tau\in\mathcal B(\sigma)} M_\mathcal B(h_\tau^{(t)}),\;\;
+            m_\uparrow(\sigma) = \sum_{\tau\in\mathcal N_\uparrow(\sigma)} M_\uparrow(h_\tau^{(t)}), \\[2pt]
+            h_\sigma^{(t+1)} &= \mathrm{UP}\bigl(h_\sigma^{(t)},\,m_\mathcal B(\sigma),\,m_\uparrow(\sigma)\bigr).
+          \end{align*}
+        }%
+        $M_\mathcal B,\,M_\uparrow,\,\mathrm{UP}$: GIN-style MLPs \citep{xu_how_2019}.
+
+        \medskip
+        \textbf{Drop-in.} The same sums silently mix
+        \textcolor{orange!75!black}{\textbf{ring}} and \textcolor{blue!70!black}{\textbf{path}}
+        messages with the \emph{kernel unchanged}.
+
+      \end{block}
+
+      \medskip
+
+      \begin{exampleblock}{Theoretical Results}
+
+        \heading{U-PWL: WL test on $\mathcal C(G)$}
+        \[
+          c_\sigma^{(t+1)}=\textsc{Hash}\!\bigl(
+            c_\sigma^{(t)},\;
+            \{\!\{c_\tau^{(t)}\}\!\}_{\mathcal B(\sigma)},\;
+            \{\!\{c_\tau^{(t)}\}\!\}_{\mathcal N_\uparrow(\sigma)}
+          \bigr)
+        \]
+
+        \medskip
+      \begin{itemize}\setlength{\itemsep}{0.15em}
+          \item \textbf{Thm 1.} U-PWL $\geq$ PWL.
+          \item \textbf{Thm 2.} U-PWL $\geq$ CWL(\textit{k}-IC) at dim~2.
+          \item \textbf{Cor.}   U-PWL strictly $>$ 1-WL; not less than 3-WL.
+        \end{itemize}
+
+        \medskip
+        \emph{Why:} adding ring-cells preserves every PCN path-cell and
+        adjacency, so U-PWL refines both PWL and CWL(\textit{k}-IC)
+        \citep{bodnar_weisfeiler_2021,bodnar_weisfeiler_2022,truong_weisfeiler_2024}.
+
+      \end{exampleblock}
+
+      \medskip
+
+      \begin{block}{Cost \& Complexity on Cora}
+
+        Both modifications stay \textbf{cheap}: learnable init adds
+        parameters only; the unified lift pays a one-off preprocessing
+        cost. Per-epoch latency stays in the path-only budget.
+
+        \medskip
+        \centering\small
+        \renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}l r r r@{}}
+          \toprule
+          \textbf{Config} & \textbf{Lift (s)} & \textbf{Epoch (ms)} & \textbf{Params} \\
+          \midrule
+          Path, Det.      & 22.0 & 28.5 & 428{,}544 \\
+          Path, Learn.    & 22.0 & 37.5 & 703{,}680 \\
+          \textbf{Unified, Det.}   & \textbf{62.8} & \textbf{33.0} & \textbf{428{,}544} \\
+          Unified, Learn. & 62.8 & 43.2 & 703{,}680 \\
+          \bottomrule
+        \end{tabular}
+
+        \medskip
+        \raggedright
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item \textbf{Learnable init:} $+64\%$ params, $+32\%$ epoch.
+          \item \textbf{Unified lift:} $+26\%$ dim-2 cells; $2.9{\times}$
+            preprocessing, \emph{runs once}.
+          \item \textbf{Asymptotic:}
+            $\mathcal O(n\!\cdot\!b^{\max(k,L)})$
+            \citep{truong_weisfeiler_2024}.
+        \end{itemize}
+
+      \end{block}
+
+    \end{column}
+
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 4 -- Experiments, Results, Cost, Discussion
+    % ============================================================
+    \begin{column}{\colwidth}
+
+      \begin{block}{Cora Link Prediction: Setup \& Results}
+
+      \begin{itemize}\setlength{\itemsep}{0.18em}
+          \item \textbf{Data:} Cora \citep{sen_collective_2008}, $|\mathcal V|{=}2708$, $|\mathcal E|{=}5278$.
+          \item \textbf{Split:} $85/5/10$ \citep{kipf_variational_2016}, $1{:}1$ negatives.
+          \item \textbf{Model:} 2-layer encoder, hidden $64$, dropout $0.3$, dot decoder; $k_{\max}{=}2$, $L{=}7$.
+          \item \textbf{Train:} Adam lr $0.01$, 200 epochs, early-stop on val AUC. Mean$\pm$std over 10 seeds.
+        \end{itemize}
+
+        \medskip
+        \begin{table}
+          \centering
+          \begin{tabular}{l l c c}
+            \toprule
+            \textbf{Complex} & \textbf{Init} & \textbf{Val AUC} & \textbf{Test AUC} \\
+            \midrule
+            Path    & Det.   & $0.7344 \pm 0.0274$ & $0.7113 \pm 0.0239$ \\
+            Path    & Learn. & $0.7354 \pm 0.0230$ & $0.7123 \pm 0.0164$ \\
+            Unified & Det.   & $\mathbf{0.7366 \pm 0.0270}$ & $\mathbf{0.7132 \pm 0.0165}$ \\
+            Unified & Learn. & $0.7335 \pm 0.0213$ & $0.7111 \pm 0.0175$ \\
+            \bottomrule
+          \end{tabular}
+          \caption{ROC-AUC, 10 seeds. \textbf{Learnable alone}: test std
+            $0.0239\!\to\!0.0164$ ($-31\%$). \textbf{Unified alone}: best
+          mean test AUC. \textbf{Stacked}: partially redundant on Cora.}
+          \label{tab:ablation}
+        \end{table}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Per-Seed Variance}
+
+        \begin{figure}
+          \centering
+          \begin{tikzpicture}
+            \begin{axis}[
+                width=0.95\textwidth,
+                height=0.45\textwidth,
+                ybar,
+                bar width=9pt,
+                enlarge x limits=0.08,
+                ymin=0.655, ymax=0.760,
+                ytick={0.66,0.68,0.70,0.72,0.74,0.76},
+                yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=2},
+                ylabel={Test AUC},
+                xlabel={Seed},
+                xtick={0,1,2,3,4,5,6,7,8,9},
+                legend style={at={(0.98,0.98)}, anchor=north east,
+                  legend columns=1, font=\footnotesize,
+                  draw=black!40, fill=white, fill opacity=0.9,
+                text opacity=1, rounded corners=2pt},
+                legend cell align=left,
+                ymajorgrids=true,
+                grid style={dashed,gray!30},
+                tick label style={font=\normalsize},
+                label style={font=\normalsize},
+                axis line style={black!60},
+              ]
+              \addplot[fill=blue!50, draw=blue!70!black] coordinates {
+                (0,0.7195) (1,0.7081) (2,0.7373) (3,0.7501) (4,0.7063)
+                (5,0.7039) (6,0.6637) (7,0.7254) (8,0.7051) (9,0.6937)
+              };
+              \addplot[fill=orange!60, draw=orange!70!black] coordinates {
+                (0,0.7129) (1,0.7141) (2,0.7289) (3,0.7350) (4,0.7154)
+                (5,0.7169) (6,0.6790) (7,0.7236) (8,0.7139) (9,0.6927)
+              };
+              \draw[blue!70!black, dashed, thick]
+              ({rel axis cs:0,0} -| {axis cs:-0.5,0.7113}) --
+              ({rel axis cs:1,0} -| {axis cs:9.5,0.7113});
+              \draw[orange!75!black, dashed, thick]
+              ({rel axis cs:0,0} -| {axis cs:-0.5,0.7132}) --
+              ({rel axis cs:1,0} -| {axis cs:9.5,0.7132});
+              \node[draw=red!70!black, very thick, rounded corners=3pt,
+                fill=red!10, text=red!65!black,
+                font=\footnotesize\bfseries, inner sep=4pt,
+              anchor=center] (callout)
+              at (axis cs:5, 0.745)
+              {worst-seed rescue: $+1.5$ pts};
+              \draw[-{Stealth[length=3mm,width=2mm]},
+              red!70!black, very thick]
+              ($(callout.south west)!0.8!(callout.south east)$)
+              -- (axis cs:6.25, 0.687);
+              \legend{Path: Det., Unified: Det.}
+            \end{axis}
+          \end{tikzpicture}
+          \caption{Per-seed test AUC; dashed lines mark the 10-seed
+            means (Path\,$0.7113$, Unified\,$0.7132$). The unified lift
+            lifts the worst-case seeds the most (seed 6:
+            $0.664\!\to\!0.679$), consistent with the stronger triadic
+          signal supplied by ring-cells.}
+        \end{figure}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{Limitations \& Future Work}
+
+        \textbf{Limitations.} Cora gains are modest ($<\!1\%$ AUC);
+        stacked modifications interact; closing the gap to SEAL /
+        NBFNet requires larger benchmarks.
+
+        \medskip
+        \textbf{Future.}
+      \begin{itemize}\setlength{\itemsep}{0.15em}
+          \item Clique-cells alongside paths and rings.
+          \item Larger benchmarks: OGBL-COLLAB / OGBL-PPA.
+          \item Learnable gating to rebalance triangle over-weighting
+            (each 3-cycle is one ring and three paths).
+        \end{itemize}
+
+      \end{block}
+
+      \medskip
+
+      \begin{block}{References}
+
+        \nocite{*}
+        \renewcommand{\bibsep}{1pt}
+        {\fontsize{14pt}{17pt}\selectfont
+        \bibliographystyle{plainnat}\bibliography{poster}}
+
+      \end{block}
+
+    \end{column}
+
+    \separatorcolumn
+  \end{columns}
+\end{frame}
+
+\end{document}

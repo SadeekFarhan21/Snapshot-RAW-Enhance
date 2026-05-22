@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>poster.pdf — live preview</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1c1c1e; color: #ddd;
+               font: 13px/1.4 -apple-system, system-ui, sans-serif; }
+  #bar { padding: 6px 10px; background: #2c2c2e;
+         display: flex; gap: 12px; align-items: center; }
+  #bar .dot { width: 8px; height: 8px; border-radius: 50%;
+              background: #4caf50; transition: background .2s; }
+  #bar .dot.building { background: #ff9800; }
+  #bar .dot.error    { background: #f44336; }
+  #bar code { color: #9bd; }
+  #frame { display: block; width: 100%; height: calc(100% - 32px); border: 0; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span class="dot" id="dot"></span>
+    <span>poster.pdf</span>
+    <span id="stamp">—</span>
+    <span style="margin-left:auto">auto-reloads on rebuild · <code>latexmk -pvc</code></span>
+  </div>
+  <iframe id="frame" src="poster.pdf"></iframe>
+<script>
+let lastMod = '';
+const dot   = document.getElementById('dot');
+const stamp = document.getElementById('stamp');
+const frame = document.getElementById('frame');
+
+async function check() {
+  try {
+    const r = await fetch('poster.pdf', { method: 'HEAD', cache: 'no-store' });
+    const m = r.headers.get('last-modified') || '';
+    if (m && m !== lastMod) {
+      const first = lastMod === '';
+      lastMod = m;
+      stamp.textContent = new Date(m).toLocaleTimeString();
+      if (!first) {
+        dot.classList.add('building');
+        frame.src = 'poster.pdf?t=' + Date.now();
+        setTimeout(() => dot.classList.remove('building'), 600);
+      }
+    }
+    dot.classList.remove('error');
+  } catch (e) {
+    dot.classList.add('error');
+  }
+}
+check();
+setInterval(check, 1500);
+</script>
+</body>
+</html>
