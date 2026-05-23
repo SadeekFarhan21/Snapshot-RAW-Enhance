@@ -1,0 +1,55 @@
+\begin{thebibliography}{7}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Beck and Teboulle(2009)]{beck2009fast}
+Amir Beck and Marc Teboulle.
+\newblock A fast iterative shrinkage-thresholding algorithm for linear inverse
+  problems.
+\newblock \emph{SIAM Journal on Imaging Sciences}, 2\penalty0 (1):\penalty0
+  183--202, 2009.
+
+\bibitem[Boyd et~al.(2011)Boyd, Parikh, Chu, Peleato, and
+  Eckstein]{boyd2011distributed}
+Stephen Boyd, Neal Parikh, Eric Chu, Borja Peleato, and Jonathan Eckstein.
+\newblock Distributed optimization and statistical learning via the alternating
+  direction method of multipliers.
+\newblock \emph{Foundations and Trends in Machine Learning}, 3\penalty0
+  (1):\penalty0 1--122, 2011.
+
+\bibitem[Cand{\`e}s et~al.(2006)Cand{\`e}s, Romberg, and Tao]{candes2006stable}
+Emmanuel~J. Cand{\`e}s, Justin~K. Romberg, and Terence Tao.
+\newblock Stable signal recovery from incomplete and inaccurate measurements.
+\newblock \emph{Communications on Pure and Applied Mathematics}, 59\penalty0
+  (8):\penalty0 1207--1223, 2006.
+
+\bibitem[Donoho(2006)]{donoho2006compressed}
+David~L. Donoho.
+\newblock Compressed sensing.
+\newblock \emph{IEEE Transactions on Information Theory}, 52\penalty0
+  (4):\penalty0 1289--1306, 2006.
+
+\bibitem[Donoho and Tanner(2009)]{donoho2009observed}
+David~L. Donoho and Jared Tanner.
+\newblock Observed universality of phase transitions in high-dimensional
+  geometry, with implications for modern data analysis and signal processing.
+\newblock \emph{Philosophical Transactions of the Royal Society A},
+  367\penalty0 (1906):\penalty0 4273--4293, 2009.
+
+\bibitem[Gregor and LeCun(2010)]{gregor2010lista}
+Karol Gregor and Yann LeCun.
+\newblock Learning fast approximations of sparse coding.
+\newblock In \emph{Proceedings of the 27th International Conference on Machine
+  Learning}, pages 399--406, 2010.
+
+\bibitem[Tropp and Gilbert(2007)]{tropp2007signal}
+Joel~A. Tropp and Anna~C. Gilbert.
+\newblock Signal recovery from random measurements via orthogonal matching
+  pursuit.
+\newblock \emph{IEEE Transactions on Information Theory}, 53\penalty0
+  (12):\penalty0 4655--4666, 2007.
+
+\end{thebibliography}

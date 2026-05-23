@@ -1,5 +1,5 @@
-% Poster: Learnable Path-Complex Features and Unified Path-Cellular
-% Message Passing for Link Prediction
+% Poster: Joint-CS -- Simultaneous Illumination Normalization and
+% Sparse Image Compression via Unfolded Recovery
 % Dimensions: 48 in (wide) x 36 in (high), landscape.
 
 \documentclass[final]{beamer}
@@ -50,9 +50,9 @@
 % Title
 % ====================
 
-\title{Learnable Path-Complex Features and Unified Path--Cellular Message Passing for Link Prediction}
+\title{Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery}
 
-\author{Farhan Sadeek\inst{1} \and Sie Hendrata Dharmawan\inst{1} \and Peter Chin\inst{1}}
+\author{Farhan Sadeek\inst{1}}
 
 \institute[Dartmouth]{\inst{1} Thayer School of Engineering, Dartmouth College, Hanover, NH 03755, USA}
 
@@ -61,7 +61,7 @@
 % ====================
 
 \footercontent{
-  Path Complex Networks: Topological Deep Learning \hfill
+  ENGS~109 Final Project: Joint Compressed Sensing and Illumination Recovery \hfill
   Dartmouth College, Thayer School of Engineering \hfill
 \href{mailto:farhan.sadeek.29@dartmouth.edu}{farhan.sadeek.29@dartmouth.edu}}
 
@@ -82,23 +82,24 @@
 
       \begin{block}{Motivation}
 
-        \textbf{1-WL bounds plain GNNs} \citep{xu_how_2019}. Topological
-        lifts escape it by message-passing over a richer object:
-      \begin{itemize}\setlength{\itemsep}{0.15em}
-          \item \textbf{MPSN} \citep{bodnar_weisfeiler_2021}: biased to \emph{cliques}.
-          \item \textbf{CWN} \citep{bodnar_weisfeiler_2022}: biased to \emph{induced cycles}.
-          \item \textbf{PCN} \citep{truong_weisfeiler_2024}: simple paths, no substructure bias.
-        \end{itemize}
+        \textbf{Cameras sample then throw away.} A JPEG keeps only
+        $5$--$10\%$ of DCT coefficients, and the ISP further reshapes
+        the data through demosaicing, tone-mapping, and white-balance.
+        Compressed sensing reverses this: $M\!\ll\! N$ random
+        measurements suffice if the signal is sparse
+        \citep{candes2006stable,donoho2006compressed}.
 
         \medskip
-        \textbf{PCN leaves two problems on the table:}
+        \textbf{The sequential pipeline wastes its prior:}
       \begin{enumerate}\setlength{\itemsep}{0.15em}
-          \item Symmetric scatter-sum init forces
-            $A{\to}B{\to}C$ and $C{\to}B{\to}A$ to receive \emph{identical}
-            embeddings.
-          \item Lift is monolithic: paths \emph{or} rings.
-            Link prediction needs the closed-cycle signal that paths
-            alone discard.
+          \item RAW sensors measure $\boldsymbol{x}=\boldsymbol{s}\odot\boldsymbol{g}$, the
+            \emph{product} of sparse reflectance and a smooth
+            illumination field.
+          \item CS-then-correct enforces $\ell_1$ on $\boldsymbol{x}$, but
+            $\boldsymbol{x}$ is \emph{not} DCT-sparse; multiplication by
+            $\boldsymbol{g}$ destroys the sparsity the regularizer relies on.
+          \item Post-hoc column-mean correction can rescale but
+            cannot restore information already shrunken away.
         \end{enumerate}
 
       \end{block}
@@ -108,15 +109,18 @@
       \begin{alertblock}{Our Contributions}
 
       \begin{enumerate}\setlength{\itemsep}{0.2em}
-          \item \textbf{Position-aware learnable init.} $k{+}1$ position-specific
-            linear maps per $k$-cell: strictly subsumes the scatter-sum
-            and breaks orientation symmetry at $t{=}0$.
-          \item \textbf{Unified path and cellular complex.} Path- and ring-cells
-            coexist at dim~2; canonicalised edges route messages between
-            them for free.
-          \item \textbf{Theory (U-PWL).} U-PWL\,$\geq$\,PWL \emph{and} U-PWL\,$\geq$\,CWL(\textit{k}-IC); strictly $>$ 1-WL.
-          \item \textbf{Cora ablation, 10 seeds.} Each modification cuts seed
-            variance; unified lift achieves the best mean test AUC.
+          \item \textbf{Joint-CS objective.} A single $\ell_1{+}$smooth-prior
+            problem in $(\boldsymbol{c},\boldsymbol{g})$ solved by block-coordinate
+            alternation: FISTA on $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
+          \item \textbf{Deep-unfolded inner solver.} A $K{=}10$-layer
+            LISTA \citep{gregor2010lista} with Adam, gradient clipping
+            and best-checkpoint restore for stability.
+          \item \textbf{Scene-dependent benchmark.} Phase transition,
+            multi-image rate-distortion, LISTA-vs-classical, and
+            per-scene illumination ablation on $5$ natural images.
+          \item \textbf{Honest failure-mode analysis.} Joint catastrophically
+            fails on near-uniform scenes (moon, $-8$\,dB); we trace
+            it to rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$.
         \end{enumerate}
 
       \end{alertblock}
@@ -126,53 +130,58 @@
       \begin{exampleblock}{Big Takeaway}
 
         \large
-        \textbf{Unified path- and ring-cells with a learnable,
-          order-aware init give PCN strictly greater expressivity and the
-        best Cora AUC --- at \emph{zero} kernel-level cost.}
+        \textbf{Estimating reflectance and illumination
+          \emph{jointly} beats the conventional CS-then-correct
+        pipeline by up to $+4.7$\,dB on textured scenes ---
+        \emph{when} the scene has enough column-wise energy to
+        identify the gain.}
 
         \medskip\normalsize
       \begin{itemize}\setlength{\itemsep}{0.15em}
-          \item \textbf{Greater expressivity:} proved via U-PWL theory.
-          \item \textbf{Lower variance:} $-31\%$ test-AUC std across 10 seeds.
-          \item \textbf{Zero kernel cost:} same MP architecture as PCN.
+          \item \textbf{Textured wins:} $+1.1$ to $+4.7$\,dB (cameraman, astronaut).
+          \item \textbf{LISTA speedup:} $K{=}10$ matches FISTA at $22$ iters.
+          \item \textbf{Failure mode:} $-8$\,dB on near-uniform (moon)
+            -- needs an identifiability gate.
         \end{itemize}
 
       \end{exampleblock}
 
       \medskip
 
-      \begin{block}{Background: Path Complexes}
+      \begin{block}{Background: Compressed Sensing}
 
-        A \emph{simple $k$-path} is an ordered tuple
-        $\sigma=(v_0,\ldots,v_k)$ of distinct vertices with
-        $\{v_i,v_{i+1}\}\!\in\!\mathcal E$; write $P_k(G)$ for the
-        full set. The boundary alternates end-deletion,
-        $\partial\,e_{i_0\ldots i_p}=\sum_{q}(-1)^q\,e_{i_0\ldots\hat{i}_q\ldots i_p}$
-        \citep{grigoryan_homologies_2013}, and PCN message-passes over
-        the faces $\mathcal B(\sigma)$ together with the upper
-        adjacencies $\mathcal N_\uparrow(\sigma)$.
-
-        \medskip
-        \centering
-        \includegraphics[width=0.55\colwidth]{../paper/path_complex_illustration.pdf}
-        {\footnotesize\\$\mathcal S_2\subset\mathcal A_2$: path complexes
-        strictly enrich the 2-cell vocabulary.}
+        With $\boldsymbol{x}{=}\boldsymbol{\Psi}\boldsymbol{c}$ and $\|\boldsymbol{c}\|_0\!\leq\!S$, the
+        forward model is
+        $\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$, $\boldsymbol{A}{\in}\mathbb R^{M{\times}N}$.
+        If $\boldsymbol{A}$ satisfies the RIP with
+        $\delta_{2S}\!<\!\sqrt 2{-}1$, the Lasso relaxation
+        \[
+          \boldsymbol{c}_\lambda
+          =\arg\min_{\boldsymbol{c}}\;\tfrac12\|\boldsymbol{A}\boldsymbol{\Psi}\boldsymbol{c}-\boldsymbol{y}\|_2^2
+          +\lambda\|\boldsymbol{c}\|_1
+        \]
+        recovers $\boldsymbol{c}$ to within $O(\epsilon)$
+        \citep{candes2006stable}. We use the 2D DCT as $\boldsymbol{\Psi}$, a
+        strong natural-image sparsifying basis.
 
       \end{block}
 
       \medskip
 
-      \begin{block}{The Deterministic-Init Problem}
+      \begin{block}{The Sequential-Pipeline Problem}
 
-        PCN initialises cell features by a symmetric aggregation,
-        $h_\sigma^{(0)}=\bigoplus_{v\in\sigma}x_v$ with
-        $\oplus\!\in\!\{\text{sum},\text{mean}\}$
-        \citep{truong_weisfeiler_2024}, which immediately collapses
-        orientation: $h_{(A,B,C)}^{(0)}=h_{(C,B,A)}^{(0)}$. The damage
-        is permanent, since later permutation-invariant aggregation also
-        discards the signed boundary, so the source/target asymmetry
-        that link decoders rely on is erased before message passing
-        even starts.
+        A conventional pipeline recovers $\boldsymbol{x}$ first, then divides
+        out an illumination estimate. Two errors compound:
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item \textbf{Sparsity broken at the prior.} Pointwise
+            multiplication by $\boldsymbol{g}$ kills DCT-domain sparsity, so
+            $\ell_1$ over-shrinks high-illumination coefficients.
+          \item \textbf{Correction is shape-rigid.} A column-mean
+            divisor copies the gradient but cannot restore the
+            information the over-shrinkage has already destroyed.
+        \end{itemize}
+        Joint-CS estimates $\boldsymbol{c}$ and $\boldsymbol{g}$ together so the
+        $\ell_1$ prior sees the true sparse signal $\boldsymbol{s}$.
 
       \end{block}
 
@@ -188,139 +197,130 @@
       \begin{block}{Notation}
 
         \begin{tabular}{@{}l@{\hspace{0.9em}}l@{}}
-          $P_k(G),R_L(G)$ & $k$-paths;\,induced cycles \\
-          $\sigma=(v_0,\ldots,v_k)$ & ordered $k$-cell \\
-          $\mathcal B,\mathcal N_\uparrow$ & faces; upper-adjacents \\
-          $W_i^{(k)}$ & pos.-aware init weight \\
-          $\mathcal C(G)$ & unified path and ring complex \\
+          $\boldsymbol{y}\!\in\!\mathbb R^M$  & CS measurements ($M{\ll}N$) \\
+          $\boldsymbol{A}\!\in\!\mathbb R^{M{\times}N}$ & Gaussian sensing matrix \\
+          $\boldsymbol{\Psi}$ & 2D DCT sparsifying basis \\
+          $\boldsymbol{c}$ & sparse DCT coefficients \\
+          $\boldsymbol{s}{=}\boldsymbol{\Psi}\boldsymbol{c}$ & sparse reflectance image \\
+          $\boldsymbol{g}\!\in\!\mathbb R^{\sqrt N}$ & per-column illumination gain \\
+          $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}_\textrm{pix}$ & RAW signal \\
         \end{tabular}
 
       \end{block}
 
       \medskip
 
-      \begin{block}{Method 1: Position-Aware Learnable Init}
+      \begin{block}{Method 1: Joint-CS Objective}
 
-        \textbf{Replace} the scatter-sum with $k{+}1$ position-specific maps:
+        \textbf{Replace} the two-stage pipeline with a single objective:
         \[
           \boxed{\;
-            h_\sigma^{(0)} \;=\; \sum_{i=0}^{k} W_i^{(k)}\,x_{v_i}
+            \min_{\boldsymbol{c},\boldsymbol{g}}\;
+            \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})
+            \boldsymbol{\Psi}\boldsymbol{c}-\boldsymbol{y}\big\|_2^2
+            +\lambda_c\|\boldsymbol{c}\|_1
+            +\lambda_g\|\nabla\boldsymbol{g}\|_2^2
           \;}
         \]
-        Each node contributes once per cell, so the asymptotic cost is
-        unchanged. Sharing $W_i^{(k)}=W$ recovers a linear projection
-        of the scatter-sum, so the new init strictly subsumes the
-        deterministic one; for unequal weights, paths $\sigma\neq\sigma'$
-        with the same multi-set of endpoints receive \emph{distinct}
-        features, something no symmetric $\bigoplus$ can produce. The
-        first vs.\ last endpoint encodes source vs.\ target, exactly
-        the asymmetry link decoders already exploit. The price is
-        $(k{+}1)\,d\,d_{\!\textrm{in}}$ parameters per $k$-cell ($d{=}64$
-        here); the init still runs in $\mathcal O(|P_k|\,d)$.
+        Jointly non-convex but \textbf{block-convex} in each variable.
+
+        \medskip
+        \textbf{$\boldsymbol{c}$-step.} Fix $\boldsymbol{g}$; effective sensing matrix
+        $\boldsymbol{A}_{\!\textrm{eff}}{=}\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})\boldsymbol{\Psi}$,
+        update is a standard Lasso solved by FISTA.
+
+        \medskip
+        \textbf{$\boldsymbol{g}$-step.} Fix $\boldsymbol{c}$; with $\hat{\boldsymbol{s}}{=}\boldsymbol{\Psi}\boldsymbol{c}$
+        the model is linear in $\boldsymbol{g}$,
+        $\boldsymbol{y}{=}\boldsymbol{B}(\hat{\boldsymbol{s}})\boldsymbol{g}{+}\boldsymbol{w}$, and the
+        update is closed-form ridge:
+        \[
+          \boldsymbol{g}^\star
+          =\bigl(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}+\lambda_g \boldsymbol{L}\bigr)^{-1}\boldsymbol{B}^{\!\top}\boldsymbol{y},
+        \]
+        with $\boldsymbol{L}{=}\nabla^{\!\top}\!\nabla$ the 1D discrete
+        Laplacian. We clamp $\boldsymbol{g}{\geq}\epsilon_g$ to avoid
+        divide-by-zero.
+
+        \medskip
+        \textbf{Gain ambiguity.} The model has scalar invariance
+        $(\boldsymbol{s},\boldsymbol{g})\!\to\!(a\boldsymbol{s},\boldsymbol{g}/a)$; we resolve at
+        evaluation by the optimal positive gain
+        $a^\star{=}\langle\hat{\boldsymbol{s}},\boldsymbol{s}_\textrm{true}\rangle/\|\hat{\boldsymbol{s}}\|^2$,
+        applied identically to baselines.
 
       \end{block}
 
       \medskip
 
-      \begin{block}{Method 2: Unified Path and Cellular Complex}
+      \begin{block}{Method 2: Deep-Unfolded LISTA Inner Solver}
 
-        Stack ring-cells \emph{on top of} the path complex at dim~2:
+        Replace the FISTA $\boldsymbol{c}$-step with $K$ learned layers
+        \citep{gregor2010lista}:
         \[
-          \mathcal C_2(G)\;=\;\underbrace{P_2(G)}_{\text{2-paths}}\;\cup\;
-          \underbrace{R_L(G)}_{\text{induced cycles},\,L\leq 7}
+          \boldsymbol{c}^{(k+1)}
+          =\mathcal S_{\theta_k}\!\bigl(
+          \boldsymbol{W}_t\boldsymbol{c}^{(k)}+\boldsymbol{W}_e\boldsymbol{y}\bigr),
+          \quad k=0,\dots,K{-}1.
         \]
-        Path- and ring-cells have different boundary rules but share a
-        single edge representation: a ring and a path on the same edge
-        resolve to the \emph{same} canonical edge cell, so
-        upper-adjacency mixes ring\,$\leftrightarrow$\,path messages
-        for free.
+        Initialise
+        $\boldsymbol{W}_e{=}\tfrac1L(\boldsymbol{A}\boldsymbol{\Psi})^{\!\top}$,
+        $\boldsymbol{W}_t{=}\boldsymbol{I}{-}\tfrac1L(\boldsymbol{A}\boldsymbol{\Psi})^{\!\top}\boldsymbol{A}\boldsymbol{\Psi}$,
+        $\theta_k{=}\lambda/L$ to reproduce ISTA at step zero, then
+        train end-to-end on $(\boldsymbol{y},\boldsymbol{c})$ pairs.
 
         \medskip
         \begin{figure}
           \centering
           \begin{tikzpicture}[
-              scale=1.25,
-              vx/.style={circle, draw=black, very thick, fill=white,
-              minimum size=12mm, inner sep=0pt, font=\large\bfseries},
-              edge/.style={very thick, draw=black!75},
-              ringfill/.style={fill=orange!45, draw=none, opacity=0.7},
-              pathedge/.style={line width=1.2mm, draw=blue!65!black,
-                -{Stealth[length=4mm,width=3mm]},
-              shorten >=2pt, shorten <=2pt},
-              panel/.style={font=\normalsize\bfseries}
+              scale=1.0,
+              every node/.style={font=\footnotesize},
+              lstep/.style={rounded corners=3pt, draw=black!70, very thick,
+                fill=blue!10, minimum width=2.0cm, minimum height=0.9cm,
+              font=\small\bfseries, align=center},
+              thr/.style={rounded corners=3pt, draw=orange!75!black, very thick,
+                fill=orange!20, minimum width=1.5cm, minimum height=0.9cm,
+              font=\small\bfseries, align=center},
+              flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
             ]
-            % ============ (a) original graph ============
-            \node[vx] (A)  at (-1.5,  1.5) {A};
-            \node[vx] (B)  at ( 1.5,  1.5) {B};
-            \node[vx] (C)  at ( 1.5, -1.5) {C};
-            \node[vx] (D)  at (-1.5, -1.5) {D};
-            \draw[edge] (A) -- (B); \draw[edge] (B) -- (C);
-            \draw[edge] (C) -- (D); \draw[edge] (D) -- (A);
-            \draw[edge] (A) -- (C);
-            \node[panel] at (0, -3.0) {(a) graph $G$};
+            \node[lstep] (l1) at (0,0)  {LISTA\\layer 1};
+            \node[thr]   (s1) at (2.2,0) {$\mathcal S_{\theta_1}$};
+            \node[lstep] (l2) at (4.6,0) {LISTA\\layer 2};
+            \node[thr]   (s2) at (6.8,0) {$\mathcal S_{\theta_2}$};
+            \node          at (8.6,0)   {$\cdots$};
+            \node[lstep] (lk) at (10.6,0){LISTA\\layer $K$};
+            \node[thr]   (sk) at (12.8,0){$\mathcal S_{\theta_K}$};
 
-            % ============ (b) path + ring at dim 2 ============
-            \begin{scope}[xshift=8cm]
-              \fill[ringfill] (-1.5, 1.5) -- (1.5, 1.5) -- (1.5, -1.5) -- cycle;
-              \draw[edge] (-1.5,-1.5) -- ( 1.5,-1.5);
-              \draw[edge] (-1.5,-1.5) -- (-1.5, 1.5);
-              \draw[edge] (-1.5, 1.5) -- ( 1.5,-1.5);
-              \draw[pathedge] (-1.5, 1.5) -- ( 1.5, 1.5);
-              \draw[pathedge] ( 1.5, 1.5) -- ( 1.5,-1.5);
-              \node[vx] (A2) at (-1.5,  1.5) {A};
-              \node[vx] (B2) at ( 1.5,  1.5) {B};
-              \node[vx] (C2) at ( 1.5, -1.5) {C};
-              \node[vx] (D2) at (-1.5, -1.5) {D};
-              \node[panel] at (0, -3.0) {(b) $\mathcal{C}_2$: path \emph{and} ring};
-            \end{scope}
+            \node[font=\small] (y) at (-2.0,0) {$\boldsymbol{y}$};
+            \node[font=\small] (c) at (14.8,0) {$\hat{\boldsymbol{c}}$};
+
+            \draw[flowarr] (y)--(l1);
+            \draw[flowarr] (l1)--(s1);
+            \draw[flowarr] (s1)--(l2);
+            \draw[flowarr] (l2)--(s2);
+            \draw[flowarr] (s2)--(8.0,0);
+            \draw[flowarr] (9.2,0)--(lk);
+            \draw[flowarr] (lk)--(sk);
+            \draw[flowarr] (sk)--(c);
+
+            \node[font=\scriptsize, text=black!65, anchor=north]
+              at (6.4,-0.9) {tied $\boldsymbol{W}_e,\boldsymbol{W}_t$; per-layer learnable $\theta_k$};
           \end{tikzpicture}
-          \caption{\textbf{Unified path and cellular complex.} On triangle
-            $ABC$, the \textcolor{orange!75!black}{\textbf{ring-cell}} (orange fill)
-            and the \textcolor{blue!70!black}{\textbf{path-cell}} $A{\to}B{\to}C$
-            (blue arrows) coexist and share edges $AB$, $BC$ via
-            canonicalised IDs, so $\mathcal N_\uparrow$ routes
-          messages between them at zero kernel cost.}
-          \label{fig:unified}
+          \caption{$K$-layer LISTA with tied weights and per-layer
+            thresholds. Each $\theta_k$ adapts to that layer's effective
+            noise; the recurrence reproduces ISTA at initialisation.}
         \end{figure}
 
-        \heading{Why this targets link prediction}
+        \heading{Stability tricks}
 
-        Common neighbours and short cycles drive link prediction
-        (Adamic--Adar, SEAL). Path-cells expose only the \emph{open}
-        neighbourhoods of $(u,v)$, whereas ring-cells expose the
-        \emph{closed} ones, supplying exactly the signal that
-        path-only PCN misses.
-
-        \medskip
-        \heading{Boundary rules differ; adjacency unifies}
-
-        The path boundary is the signed alternating end-deletion
-        $\partial(v_0,\!\ldots\!,v_k)\!=\!\sum_q(-1)^q(v_0,\!\ldots\!,\hat v_q,\!\ldots\!,v_k)$,
-        while the ring boundary collects the cycle's edges unsigned
-        (the standard cellular $\partial_2$). Both reduce to the
-        \emph{same} canonical edge IDs, so a single
-        $\mathcal N_\uparrow$ graph carries both kinds of message
-        with no extra MP kernel. On Cora this adds $+26\%$ dim-2
-        cells; each triangle contributes $1$ ring and $3$ paths, so
-        rings supply the triadic-closure signal that paths alone
-        cannot encode.
-
-      \end{block}
-
-      \medskip
-
-      \begin{block}{Construction Recipe}
-
-      \begin{enumerate}\setlength{\itemsep}{0.18em}
-          \item Enumerate $P_2(G)$ and $R_{\leq 7}(G)$ separately
-            (one-off preprocessing).
-          \item Canonicalise every edge by sorting endpoint pairs; this is
-            the \emph{single} representation any 1-cell receives.
-          \item Build boundary and upper-adjacency tensors over the
-            merged dim-2 set $\mathcal C_2(G)=P_2\cup R_{\leq 7}$.
-          \item Run standard PCN message passing; the position-aware
-            init keeps orientation through every layer.
-        \end{enumerate}
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item Naive Adam@$5{\times}10^{-3}$: clean descent to
+            $0.12$ NMSE, then blow-up to $\sim\!10^3$.
+          \item Diagnosis: $\rho(\boldsymbol{W}_t){>}1$ along some
+            eigendirection causes the recurrence to diverge.
+          \item Fix: (i) lr$\to\!10^{-3}$, (ii) clip-norm $1.0$,
+            (iii) restore best-val checkpoint.
+        \end{itemize}
 
       \end{block}
 
@@ -329,171 +329,142 @@
     \separatorcolumn
 
     % ============================================================
-    % COLUMN 3 -- Worked Example + Architecture + Theory
+    % COLUMN 3 -- Pipeline + Algorithm + Phase Transition
     % ============================================================
     \begin{column}{\colwidth}
-
-      \begin{block}{Worked Example: Symmetry Breaking}
-
-        Take graph $G$: $a{-}b{-}c$ with one-hot features
-        $x_a{=}e_1,\,x_b{=}e_2,\,x_c{=}e_3$.
-        Compare reversed paths $\sigma{=}(a,b,c)$ and $\sigma'{=}(c,b,a)$.
-
-        \medskip
-        \textbf{Deterministic init} collapses orientation:
-        \[
-          h_\sigma^{(0)} \;=\; e_1{+}e_2{+}e_3 \;=\; h_{\sigma'}^{(0)}.
-        \]
-
-        \medskip
-        \textbf{Learnable init} with
-        $W_0^{(2)}{=}I,\;W_1^{(2)}{=}\mathbf 0,\;W_2^{(2)}{=}2I$:
-        \begin{align*}
-          h_\sigma^{(0)}    &= I\,e_1 + \mathbf 0\,e_2 + 2I\,e_3
-          \;=\; e_1 + 2\,e_3,\\
-          h_{\sigma'}^{(0)} &= I\,e_3 + \mathbf 0\,e_2 + 2I\,e_1
-          \;=\; e_3 + 2\,e_1\;\neq\;h_\sigma^{(0)}.
-        \end{align*}
-
-        \medskip
-        Orientation therefore \textbf{survives} initialization and
-        flows through every later message-passing step.
-
-      \end{block}
-
-      \medskip
 
       \begin{block}{Encoder $\to$ Decoder Pipeline}
 
         \begin{figure}
           \centering
           \begin{tikzpicture}[
-              xscale=1.25,
+              xscale=1.18,
               every node/.style={font=\footnotesize},
-              dimbox/.style={rounded corners=2pt, draw=black!60,
-                minimum width=3.2cm, minimum height=0.8cm,
+              raw/.style={rounded corners=2pt, draw=black!60, fill=blue!10,
+                draw=blue!55!black,
+                minimum width=2.8cm, minimum height=0.8cm,
               font=\footnotesize\bfseries, align=center},
-              dim0/.style={dimbox, fill=blue!10,   draw=blue!55!black},
-              dim1/.style={dimbox, fill=green!10,  draw=green!55!black},
-              dim2/.style={dimbox, fill=orange!18, draw=orange!75!black},
-              mp/.style={rounded corners=4pt, draw=black!80, very thick,
-                fill=yellow!12, minimum width=3.2cm, minimum height=1.0cm,
+              meas/.style={rounded corners=2pt, draw=green!55!black, fill=green!10,
+                minimum width=2.8cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              joint/.style={rounded corners=4pt, draw=black!80, very thick,
+                fill=yellow!12, minimum width=2.8cm, minimum height=1.4cm,
               font=\footnotesize\bfseries, align=center},
               dec/.style={rounded corners=4pt, draw=red!70!black, very thick,
-                fill=red!8, minimum width=3.2cm, minimum height=1.0cm,
+                fill=red!8, minimum width=2.8cm, minimum height=0.8cm,
               font=\footnotesize\bfseries, align=center},
               flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
             ]
-            \node[dim0] (x0) at (0, 1.4) {nodes $x_v$};
-            \node[dim1] (x1) at (0, 0.0) {edges $P_1$};
-            \node[dim2] (x2) at (0,-1.4) {$P_2\!\cup\!R_L$};
-            \node[mp]   (mp1) at (4.4, 0.0) {PCN layer\\\#1};
-            \node[mp]   (mp2) at (8.0, 0.0) {PCN layer\\\#2};
-            \node[dim0] (z)   at (11.6, 0.0) {$z\!\in\!\mathbb R^{|\mathcal V|\!\times\! d}$};
-            \node[dec]  (dec) at (15.2, 0.0) {$\hat y_{uv}\!=\!z_u^{\!\top}z_v$};
+            \node[raw]   (s)   at (0, 1.2) {reflectance $\boldsymbol{s}$};
+            \node[raw]   (g)   at (0,-1.2) {illumination $\boldsymbol{g}$};
+            \node[meas]  (y)   at (3.4, 0.0) {$\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$};
+            \node[joint] (alt) at (7.4, 0.0) {block-coord\\$\boldsymbol{c}\!\leftrightarrow\!\boldsymbol{g}$};
+            \node[raw]   (sh)  at (11.0, 1.2) {$\hat{\boldsymbol{s}}{=}\boldsymbol{\Psi}\hat{\boldsymbol{c}}$};
+            \node[raw]   (gh)  at (11.0,-1.2) {$\hat{\boldsymbol{g}}$};
+            \node[dec]   (out) at (14.6, 0.0) {gain-match\\+ PSNR};
 
-            \draw[flowarr] (x0)--(mp1.west);
-            \draw[flowarr] (x1)--(mp1.west);
-            \draw[flowarr] (x2)--(mp1.west);
-            \draw[flowarr] (mp1)--(mp2);
-            \draw[flowarr] (mp2)--(z);
-            \draw[flowarr] (z)--(dec);
+            \draw[flowarr] (s.east) -- (y.west);
+            \draw[flowarr] (g.east) -- (y.west);
+            \draw[flowarr] (y) -- (alt);
+            \draw[flowarr] (alt.east) -- (sh.west);
+            \draw[flowarr] (alt.east) -- (gh.west);
+            \draw[flowarr] (sh) -- (out);
+            \draw[flowarr] (gh) -- (out);
 
-            \node[font=\scriptsize, anchor=north, text=black!65] at (1.2,-2.1)
-            {pos.-aware / linear init};
-            \node[font=\scriptsize, anchor=north, text=black!65] at (6.2,-2.1)
-            {bnd, $\mathcal N_\uparrow$};
-            \node[font=\scriptsize, anchor=north, text=black!65] at (13.4,-2.1)
-            {BCE, 1:1 negs};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (1.7,-2.1)
+            {$\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (5.4,-2.1)
+            {Gaussian $\boldsymbol{A}$, AWGN};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (9.2,-2.1)
+            {LISTA / FISTA + ridge};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (12.8,-2.1)
+            {$a^\star\!=\!\langle\hat{\boldsymbol{s}},\boldsymbol{s}\rangle/\|\hat{\boldsymbol{s}}\|^2$};
           \end{tikzpicture}
-          \caption{Cell features (dim-0,1,2) are initialised (linear
-            for nodes, \emph{position-aware} for paths and rings) and
-            refined by two PCN message-passing layers; the node-level
-          output feeds a dot-product link decoder trained with BCE.}
+          \caption{End-to-end Joint-CS. The RAW signal
+            $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$ is measured via Gaussian
+            $\boldsymbol{A}$; block-coordinate alternation recovers
+            $(\boldsymbol{c},\boldsymbol{g})$ simultaneously; the scalar gain
+            ambiguity is resolved at evaluation.}
         \end{figure}
 
       \end{block}
 
       \medskip
 
-      \begin{block}{Message Passing on the Unified Complex}
+      \begin{block}{Block-Coordinate Recipe}
 
-        Each layer aggregates boundaries and upper-adjacent cells:
-        {\small
-          \begin{align*}
-            m_\mathcal B(\sigma) &= \sum_{\tau\in\mathcal B(\sigma)} M_\mathcal B(h_\tau^{(t)}),\;\;
-            m_\uparrow(\sigma) = \sum_{\tau\in\mathcal N_\uparrow(\sigma)} M_\uparrow(h_\tau^{(t)}), \\[2pt]
-            h_\sigma^{(t+1)} &= \mathrm{UP}\bigl(h_\sigma^{(t)},\,m_\mathcal B(\sigma),\,m_\uparrow(\sigma)\bigr).
-          \end{align*}
-        }%
-        $M_\mathcal B,\,M_\uparrow,\,\mathrm{UP}$: GIN-style MLPs \citep{xu_how_2019}.
-
-        \medskip
-        \textbf{Drop-in.} The same sums silently mix
-        \textcolor{orange!75!black}{\textbf{ring}} and \textcolor{blue!70!black}{\textbf{path}}
-        messages with the \emph{kernel unchanged}.
+      \begin{enumerate}\setlength{\itemsep}{0.18em}
+          \item Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$,
+            $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$.
+          \item \textbf{$\boldsymbol{c}$-update.} Hold $\boldsymbol{g}^{(t)}$; run
+            $T_c$ FISTA (or $K$ LISTA) steps on
+            $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t)})$.
+          \item \textbf{$\boldsymbol{g}$-update.} Hold $\boldsymbol{c}^{(t{+}1)}$; solve
+            $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
+            in closed form; clamp to $[\epsilon_g,\infty)$.
+          \item Repeat $T_\textrm{outer}{=}8$ outer iterations.
+          \item Resolve scalar gain ambiguity at evaluation.
+        \end{enumerate}
 
       \end{block}
 
       \medskip
 
-      \begin{exampleblock}{Theoretical Results}
+      \begin{exampleblock}{Phase Transition (Sec.~3.2)}
 
-        \heading{U-PWL: WL test on $\mathcal C(G)$}
-        \[
-          c_\sigma^{(t+1)}=\textsc{Hash}\!\bigl(
-            c_\sigma^{(t)},\;
-            \{\!\{c_\tau^{(t)}\}\!\}_{\mathcal B(\sigma)},\;
-            \{\!\{c_\tau^{(t)}\}\!\}_{\mathcal N_\uparrow(\sigma)}
-          \bigr)
-        \]
+        Empirical Donoho--Tanner boundary on synthetic Gaussian CS,
+        $N{=}200$, $20$ trials/cell, NMSE${<}10^{-3}$.
 
         \medskip
-      \begin{itemize}\setlength{\itemsep}{0.15em}
-          \item \textbf{Thm 1.} U-PWL $\geq$ PWL.
-          \item \textbf{Thm 2.} U-PWL $\geq$ CWL(\textit{k}-IC) at dim~2.
-          \item \textbf{Cor.}   U-PWL strictly $>$ 1-WL; not less than 3-WL.
+        \centering\small
+        \renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}l r r r r@{}}
+          \toprule
+          \textbf{$\delta=M/N$} & $0.30$ & $0.50$ & $0.70$ & $0.90$ \\
+          \midrule
+          OMC $\rho^\star$   & $\mathbf{0.35}$ & $\mathbf{0.40}$ & $0.40$         & $0.50$ \\
+          FISTA $\rho^\star$ & $0.20$ & $0.30$ & $\mathbf{0.50}$ & $\mathbf{0.65}$ \\
+          \bottomrule
+        \end{tabular}
+
+        \medskip
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item \textbf{OMP wins at low $\delta$:} exact LS-on-support
+            beats $\ell_1$ when measurements are scarce.
+          \item \textbf{FISTA wins at high $\delta$:} $\ell_1$ keeps
+            expanding the feasible region; OMP plateaus on dense
+            supports.
+          \item \textbf{Crossover} near $\delta{\approx}0.65$.
         \end{itemize}
-
-        \medskip
-        \emph{Why:} adding ring-cells preserves every PCN path-cell and
-        adjacency, so U-PWL refines both PWL and CWL(\textit{k}-IC)
-        \citep{bodnar_weisfeiler_2021,bodnar_weisfeiler_2022,truong_weisfeiler_2024}.
 
       \end{exampleblock}
 
       \medskip
 
-      \begin{block}{Cost \& Complexity on Cora}
+      \begin{block}{Rate-Distortion (Sec.~3.3)}
 
-        Both modifications stay \textbf{cheap}: learnable init adds
-        parameters only; the unified lift pays a one-off preprocessing
-        cost. Per-epoch latency stays in the path-only budget.
+        $5$-image natural-scene set, SNR${=}30$\,dB, $16{\times}16$
+        blocks. Mean PSNR$\pm$std across scenes.
 
         \medskip
         \centering\small
         \renewcommand{\arraystretch}{1.15}
-        \begin{tabular}{@{}l r r r@{}}
+        \begin{tabular}{@{}l r r r r@{}}
           \toprule
-          \textbf{Config} & \textbf{Lift (s)} & \textbf{Epoch (ms)} & \textbf{Params} \\
+          $\delta$ & $0.20$ & $0.40$ & $0.50$ & $0.70$ \\
           \midrule
-          Path, Det.      & 22.0 & 28.5 & 428{,}544 \\
-          Path, Learn.    & 22.0 & 37.5 & 703{,}680 \\
-          \textbf{Unified, Det.}   & \textbf{62.8} & \textbf{33.0} & \textbf{428{,}544} \\
-          Unified, Learn. & 62.8 & 43.2 & 703{,}680 \\
+          OMP   & $17.4{\pm}4.3$ & $20.4{\pm}3.7$ & $21.7{\pm}3.2$ & $24.9{\pm}3.0$ \\
+          FISTA & $\mathbf{19.4{\pm}4.5}$ & $\mathbf{23.6{\pm}4.1}$ & $\mathbf{25.1{\pm}3.9}$ & $\mathbf{27.6{\pm}3.5}$ \\
+          ADMM  & $17.6{\pm}4.8$ & $23.5{\pm}4.4$ & $25.0{\pm}4.0$ & $27.5{\pm}3.7$ \\
           \bottomrule
         \end{tabular}
 
         \medskip
         \raggedright
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item \textbf{Learnable init:} $+64\%$ params, $+32\%$ epoch.
-          \item \textbf{Unified lift:} $+26\%$ dim-2 cells; $2.9{\times}$
-            preprocessing, \emph{runs once}.
-          \item \textbf{Asymptotic:}
-            $\mathcal O(n\!\cdot\!b^{\max(k,L)})$
-            \citep{truong_weisfeiler_2024}.
-        \end{itemize}
+        \textbf{Verdict.} FISTA and ADMM agree within $0.5$\,dB above
+        $\delta{=}0.2$ (same Lasso objective); both beat OMP by
+        $2$--$3$\,dB.  Wide std reflects scene difficulty: moon is
+        easy ($>30$\,dB), coins is hard ($\sim20$\,dB).
 
       \end{block}
 
@@ -502,44 +473,52 @@
     \separatorcolumn
 
     % ============================================================
-    % COLUMN 4 -- Experiments, Results, Cost, Discussion
+    % COLUMN 4 -- LISTA + Joint vs Sequential + Limitations + Refs
     % ============================================================
     \begin{column}{\colwidth}
 
-      \begin{block}{Cora Link Prediction: Setup \& Results}
+      \begin{block}{LISTA vs.\ Classical at Matched Compute}
 
-      \begin{itemize}\setlength{\itemsep}{0.18em}
-          \item \textbf{Data:} Cora \citep{sen_collective_2008}, $|\mathcal V|{=}2708$, $|\mathcal E|{=}5278$.
-          \item \textbf{Split:} $85/5/10$ \citep{kipf_variational_2016}, $1{:}1$ negatives.
-          \item \textbf{Model:} 2-layer encoder, hidden $64$, dropout $0.3$, dot decoder; $k_{\max}{=}2$, $L{=}7$.
-          \item \textbf{Train:} Adam lr $0.01$, 200 epochs, early-stop on val AUC. Mean$\pm$std over 10 seeds.
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item \textbf{Setup.} $K{=}10$ tied-weight LISTA, $5000$
+            synthetic $(\boldsymbol{y},\boldsymbol{c})$ pairs, $N{=}200, M{=}80, S{=}10$,
+            SNR${=}30$\,dB.
         \end{itemize}
 
         \medskip
-        \begin{table}
-          \centering
-          \begin{tabular}{l l c c}
-            \toprule
-            \textbf{Complex} & \textbf{Init} & \textbf{Val AUC} & \textbf{Test AUC} \\
-            \midrule
-            Path    & Det.   & $0.7344 \pm 0.0274$ & $0.7113 \pm 0.0239$ \\
-            Path    & Learn. & $0.7354 \pm 0.0230$ & $0.7123 \pm 0.0164$ \\
-            Unified & Det.   & $\mathbf{0.7366 \pm 0.0270}$ & $\mathbf{0.7132 \pm 0.0165}$ \\
-            Unified & Learn. & $0.7335 \pm 0.0213$ & $0.7111 \pm 0.0175$ \\
-            \bottomrule
-          \end{tabular}
-          \caption{ROC-AUC, 10 seeds. \textbf{Learnable alone}: test std
-            $0.0239\!\to\!0.0164$ ($-31\%$). \textbf{Unified alone}: best
-          mean test AUC. \textbf{Stacked}: partially redundant on Cora.}
-          \label{tab:ablation}
-        \end{table}
+        \centering\small
+        \renewcommand{\arraystretch}{1.18}
+        \begin{tabular}{@{}l c c@{}}
+          \toprule
+          \textbf{Solver} & \textbf{Iters/Layers} & \textbf{Val NMSE} \\
+          \midrule
+          ISTA   & $10$  & $0.467$ \\
+          FISTA  & $10$  & $0.337$ \\
+          \textbf{LISTA}  & $10$  & $\mathbf{0.050}$ \\
+          \midrule
+          FISTA (matched) & $22$  & $\approx 0.05$ \\
+          FISTA (conv.)   & $500$ & $0.005$ \\
+          \bottomrule
+        \end{tabular}
+
+        \medskip
+        \raggedright
+        \textbf{$2.2\times$ inference speedup} at matched recovery;
+        LISTA still trails the converged $\ell_1$ minimum by $10\times$,
+        but amortises that gap into a $10\times$ smaller cost at
+        deployment.
 
       \end{block}
 
       \medskip
 
-      \begin{block}{Per-Seed Variance}
+      \begin{exampleblock}{Joint vs.\ Sequential: Per-Scene PSNR Gain (dB)}
 
+        $8{\times}$ horizontal illumination gradient, SNR${=}25$\,dB,
+        $16{\times}16$ center patch per scene.
+        $\Delta{=}\textrm{PSNR}_\textrm{joint}{-}\textrm{PSNR}_\textrm{seq}$.
+
+        \medskip
         \begin{figure}
           \centering
           \begin{tikzpicture}
@@ -547,16 +526,16 @@
                 width=0.95\textwidth,
                 height=0.45\textwidth,
                 ybar,
-                bar width=9pt,
-                enlarge x limits=0.08,
-                ymin=0.655, ymax=0.760,
-                ytick={0.66,0.68,0.70,0.72,0.74,0.76},
-                yticklabel style={/pgf/number format/.cd,fixed,fixed zerofill,precision=2},
-                ylabel={Test AUC},
-                xlabel={Seed},
-                xtick={0,1,2,3,4,5,6,7,8,9},
-                legend style={at={(0.98,0.98)}, anchor=north east,
-                  legend columns=1, font=\footnotesize,
+                bar width=4.5pt,
+                enlarge x limits=0.10,
+                ymin=-11, ymax=6,
+                ytick={-10,-8,-6,-4,-2,0,2,4},
+                ylabel={$\Delta$ PSNR (dB)},
+                xlabel={Measurement rate $\delta$},
+                symbolic x coords={0.20,0.30,0.40,0.50,0.60},
+                xtick=data,
+                legend style={at={(0.02,0.02)}, anchor=south west,
+                  legend columns=3, font=\scriptsize,
                   draw=black!40, fill=white, fill opacity=0.9,
                 text opacity=1, rounded corners=2pt},
                 legend cell align=left,
@@ -566,39 +545,55 @@
                 label style={font=\normalsize},
                 axis line style={black!60},
               ]
-              \addplot[fill=blue!50, draw=blue!70!black] coordinates {
-                (0,0.7195) (1,0.7081) (2,0.7373) (3,0.7501) (4,0.7063)
-                (5,0.7039) (6,0.6637) (7,0.7254) (8,0.7051) (9,0.6937)
+              \addplot[fill=blue!55,draw=blue!70!black] coordinates {
+                (0.20,2.87) (0.30,4.65) (0.40,1.13) (0.50,1.08) (0.60,3.07)
               };
-              \addplot[fill=orange!60, draw=orange!70!black] coordinates {
-                (0,0.7129) (1,0.7141) (2,0.7289) (3,0.7350) (4,0.7154)
-                (5,0.7169) (6,0.6790) (7,0.7236) (8,0.7139) (9,0.6927)
+              \addplot[fill=orange!60,draw=orange!70!black] coordinates {
+                (0.20,0.54) (0.30,0.18) (0.40,1.84) (0.50,2.31) (0.60,2.21)
               };
-              \draw[blue!70!black, dashed, thick]
-              ({rel axis cs:0,0} -| {axis cs:-0.5,0.7113}) --
-              ({rel axis cs:1,0} -| {axis cs:9.5,0.7113});
-              \draw[orange!75!black, dashed, thick]
-              ({rel axis cs:0,0} -| {axis cs:-0.5,0.7132}) --
-              ({rel axis cs:1,0} -| {axis cs:9.5,0.7132});
-              \node[draw=red!70!black, very thick, rounded corners=3pt,
-                fill=red!10, text=red!65!black,
-                font=\footnotesize\bfseries, inner sep=4pt,
-              anchor=center] (callout)
-              at (axis cs:5, 0.745)
-              {worst-seed rescue: $+1.5$ pts};
-              \draw[-{Stealth[length=3mm,width=2mm]},
-              red!70!black, very thick]
-              ($(callout.south west)!0.8!(callout.south east)$)
-              -- (axis cs:6.25, 0.687);
-              \legend{Path: Det., Unified: Det.}
+              \addplot[fill=green!50,draw=green!55!black] coordinates {
+                (0.20,-1.02) (0.30,-1.73) (0.40,0.39) (0.50,0.74) (0.60,0.32)
+              };
+              \addplot[fill=purple!40,draw=purple!60!black] coordinates {
+                (0.20,-0.79) (0.30,-0.48) (0.40,-0.23) (0.50,0.74) (0.60,0.43)
+              };
+              \addplot[fill=red!55,draw=red!70!black] coordinates {
+                (0.20,-10.03) (0.30,-9.51) (0.40,-7.76) (0.50,-9.05) (0.60,-8.37)
+              };
+              \draw[black!50, dashed, very thick]
+                ({rel axis cs:0,0} -| {axis cs:0.20,0}) --
+                ({rel axis cs:1,0} -| {axis cs:0.60,0});
+              \legend{cameraman,astronaut,coins,page,moon}
             \end{axis}
           \end{tikzpicture}
-          \caption{Per-seed test AUC; dashed lines mark the 10-seed
-            means (Path\,$0.7113$, Unified\,$0.7132$). The unified lift
-            lifts the worst-case seeds the most (seed 6:
-            $0.664\!\to\!0.679$), consistent with the stronger triadic
-          signal supplied by ring-cells.}
+          \caption{Per-scene PSNR gain of Joint-CS over the sequential
+            baseline. Textured scenes (cameraman, astronaut) gain
+            $+1.1$ to $+4.7$\,dB; coins/page are roughly a wash;
+            \textbf{moon collapses by $\sim 8$\,dB} -- a real,
+            mechanism-explainable failure mode.}
         \end{figure}
+
+      \end{exampleblock}
+
+      \medskip
+
+      \begin{block}{Why Moon Fails (and Why That's Informative)}
+
+        Moon's centre patch is mostly black sky with a thin sliver of
+        bright surface. After $8{\times}$ gradient multiplication, most
+        columns carry near-zero energy, so
+        $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$ is severely rank-deficient and
+        per-column gains are non-identifiable. The alternation then
+        drives $\boldsymbol{g}$ to a high-variance solution that fits noise.
+        The sequential pipeline avoids this by \emph{never} estimating
+        $\boldsymbol{g}$ from data -- its column-mean divisor is essentially
+        a copy of the gradient. \textbf{When the scene cannot identify
+        $\boldsymbol{g}$, refusing to estimate it is a virtue.}
+
+        \medskip
+        \textbf{Deployment rule:} gate the joint solution on
+        $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}){<}\tau$; fall back to
+        sequential otherwise. Not reported in prior CS$+$ISP literature.
 
       \end{block}
 
@@ -606,17 +601,17 @@
 
       \begin{block}{Limitations \& Future Work}
 
-        \textbf{Limitations.} Cora gains are modest ($<\!1\%$ AUC);
-        stacked modifications interact; closing the gap to SEAL /
-        NBFNet requires larger benchmarks.
-
-        \medskip
-        \textbf{Future.}
-      \begin{itemize}\setlength{\itemsep}{0.15em}
-          \item Clique-cells alongside paths and rings.
-          \item Larger benchmarks: OGBL-COLLAB / OGBL-PPA.
-          \item Learnable gating to rebalance triangle over-weighting
-            (each 3-cycle is one ring and three paths).
+      \begin{itemize}\setlength{\itemsep}{0.12em}
+          \item \textbf{Scene-dependent failure} on near-uniform images
+            (moon $-8$\,dB) needs an identifiability gate.
+          \item \textbf{1D illumination model} suits horizontal
+            gradients; 2D vignettes need a richer $\boldsymbol{g}$ prior.
+          \item \textbf{Synthetic-trained LISTA} would need
+            distribution-wide training for noise generalisation.
+          \item \textbf{Simulated measurements only}; physical
+            coded-aperture validation remains future work.
+          \item \textbf{Outer-loop unfolding} (not just $\boldsymbol{c}$-step)
+            would yield spatially-adaptive thresholds.
         \end{itemize}
 
       \end{block}

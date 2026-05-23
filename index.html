@@ -216,6 +216,21 @@
 
   mjx-container { max-width: 100%; }
   mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
+
+  .plot {
+    width: 100%;
+    height: 420px;
+    margin: 18px 0 6px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+  .plot.tall { height: 480px; }
+  .plot-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin: -2px 0 14px;
+  }
 </style>
 
 <script>
@@ -229,6 +244,7 @@
   };
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 
 <body>
@@ -249,7 +265,7 @@
   <div class="links">
     <a href="paper/neurips_2026.pdf">Paper (PDF)</a>
     <a href="poster/poster.pdf">Poster (PDF)</a>
-    <a href="https://github.com/farhansadeek/Snapshot-RAW-Enhance">Code</a>
+    <a href="https://github.com/SadeekFarhan21/Snapshot-RAW-Enhance">Code</a>
     <a href="#bibtex">BibTeX</a>
   </div>
 </header>
@@ -359,15 +375,14 @@
   <h2>Results</h2>
 
   <h3>Rate&ndash;distortion across natural images <span class="pill">Exp. 2</span></h3>
-  <figure>
-    <img src="figures/rate_distortion.png" alt="Rate-distortion sweep on five natural images.">
-    <figcaption>
-      <b>FISTA and ADMM beat OMP by 2&ndash;3&nbsp;dB across the useful
-      measurement-rate range.</b> 5-image test set (cameraman, astronaut,
-      coins, page, moon) at 64&times;64 grayscale, 16&times;16 DCT blocks,
-      Gaussian sensing, SNR&nbsp;=&nbsp;30&nbsp;dB.
-    </figcaption>
-  </figure>
+  <div id="plot-rate-distortion" class="plot"></div>
+  <p class="plot-note">
+    <b>FISTA and ADMM beat OMP by 2&ndash;3&nbsp;dB across the useful
+    measurement-rate range.</b> 5-image test set (cameraman, astronaut,
+    coins, page, moon) at 64&times;64 grayscale, 16&times;16 DCT blocks,
+    Gaussian sensing, SNR&nbsp;=&nbsp;30&nbsp;dB. Hover for exact values; toggle
+    solvers via the legend.
+  </p>
 
   <div class="table-wrap">
     <table>
@@ -404,37 +419,28 @@
   </figure>
 
   <h3>LISTA at matched compute <span class="pill">Exp. 3</span></h3>
-  <figure>
-    <img src="figures/lista_comparison.png" alt="LISTA vs ISTA / FISTA at matched layer count.">
-    <figcaption>
-      A $K{=}10$-layer learned solver matches what FISTA needs
-      <b>22 iterations</b> to reach &mdash; a $\sim 2.2\times$ iteration
-      speedup at equivalent recovery quality.
-    </figcaption>
-  </figure>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr><th>Solver</th><th>Validation NMSE @ $K=10$</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>ISTA</td><td>0.4667</td></tr>
-        <tr><td>FISTA</td><td>0.3369</td></tr>
-        <tr><td>LISTA</td><td><b>0.0501</b></td></tr>
-      </tbody>
-    </table>
-  </div>
+  <div id="plot-lista" class="plot"></div>
+  <p class="plot-note">
+    A $K{=}10$-layer learned solver matches what FISTA needs
+    <b>22 iterations</b> to reach &mdash; a $\sim 2.2\times$ iteration
+    speedup at equivalent recovery quality. Log-scale NMSE; lower is better.
+  </p>
 
   <h3>Joint vs. sequential under an illumination gradient <span class="pill">Exp. 4 &middot; headline</span></h3>
-  <figure>
-    <img src="figures/joint_vs_sequential.png" alt="Joint vs sequential recovery PSNR by measurement rate.">
-    <figcaption>
-      Aggregate PSNR vs measurement rate for the joint and sequential
-      pipelines under an 8&times; horizontal illumination gradient. Both
-      curves are scored against the illumination-normalized scene.
-    </figcaption>
-  </figure>
+  <div id="plot-joint-vs-seq" class="plot"></div>
+  <p class="plot-note">
+    Aggregate PSNR vs measurement rate for the joint and sequential
+    pipelines under an 8&times; horizontal illumination gradient. Both
+    curves are scored against the illumination-normalized scene. Shaded
+    bands show &plusmn;1&nbsp;std across the 5-scene set.
+  </p>
+
+  <div id="plot-per-scene" class="plot tall"></div>
+  <p class="plot-note">
+    Per-scene PSNR gain $\Delta = \text{joint} - \text{sequential}$ (dB).
+    Hover any bar for the exact value; the <em>moon</em> column reveals
+    the failure mode where the joint $g$-update is rank-deficient.
+  </p>
 
   <div class="table-wrap">
     <table>
@@ -495,7 +501,7 @@
 
 <section id="reproduce">
   <h2>Reproducing the experiments</h2>
-  <pre><code>git clone https://github.com/farhansadeek/Snapshot-RAW-Enhance
+  <pre><code>git clone https://github.com/SadeekFarhan21/Snapshot-RAW-Enhance
 cd Snapshot-RAW-Enhance
 
 python3 experiments/phase_transition.py      # ~8 min CPU
@@ -513,14 +519,148 @@ python3 experiments/joint_vs_sequential.py   # ~5 s</code></pre>
   year         = {2026},
   howpublished = {ENGS 109 final project,
                   Thayer School of Engineering, Dartmouth College},
-  url          = {https://github.com/farhansadeek/Snapshot-RAW-Enhance}
+  url          = {https://github.com/SadeekFarhan21/Snapshot-RAW-Enhance}
 }</code></pre>
 </section>
 
 <footer>
-  <p>&copy; 2026 Farhan Sadeek &middot; Dartmouth College &middot; <a href="paper/neurips_2026.pdf">PDF</a> &middot; <a href="https://github.com/farhansadeek/Snapshot-RAW-Enhance">source</a></p>
+  <p>&copy; 2026 Farhan Sadeek &middot; Dartmouth College &middot; <a href="paper/neurips_2026.pdf">PDF</a> &middot; <a href="https://github.com/SadeekFarhan21/Snapshot-RAW-Enhance">source</a></p>
 </footer>
 
 </main>
+
+<script>
+(function () {
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const fg = cssVar('--fg') || (isDark ? '#e9edf1' : '#1a1a1a');
+  const muted = cssVar('--muted') || (isDark ? '#9aa3ad' : '#5b6470');
+  const rule = cssVar('--rule') || (isDark ? '#2a2f35' : '#e6e8eb');
+  const bg = cssVar('--bg') || (isDark ? '#14171a' : '#ffffff');
+
+  const palette = {
+    omp:   '#d1495b',
+    fista: '#0a4d8c',
+    admm:  '#2e933c',
+    seq:   '#9b59b6',
+    joint: '#0a4d8c',
+    ista:  '#d1495b',
+    lista: '#2e933c'
+  };
+
+  const baseLayout = {
+    paper_bgcolor: bg,
+    plot_bgcolor: bg,
+    font: { family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: fg, size: 13 },
+    margin: { l: 56, r: 20, t: 36, b: 52 },
+    xaxis: { gridcolor: rule, zerolinecolor: rule, linecolor: rule, tickcolor: rule, color: muted, titlefont: { color: fg } },
+    yaxis: { gridcolor: rule, zerolinecolor: rule, linecolor: rule, tickcolor: rule, color: muted, titlefont: { color: fg } },
+    legend: { bgcolor: 'rgba(0,0,0,0)', font: { color: fg } },
+    hoverlabel: { bgcolor: bg, bordercolor: rule, font: { color: fg } }
+  };
+
+  const config = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d', 'select2d'] };
+
+  // ───── Rate-distortion ─────
+  const rd = {
+    deltas: [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70],
+    omp:   { mean: [15.46, 17.42, 19.15, 20.42, 21.73, 23.50, 24.89], std: [4.44, 4.33, 4.04, 3.70, 3.20, 3.00, 2.97] },
+    fista: { mean: [16.67, 19.39, 21.73, 23.64, 25.06, 26.43, 27.57], std: [4.85, 4.49, 4.28, 4.09, 3.93, 3.82, 3.52] },
+    admm:  { mean: [11.23, 17.62, 21.27, 23.47, 24.98, 26.37, 27.45], std: [3.07, 4.78, 4.61, 4.36, 4.00, 3.89, 3.65] }
+  };
+  const rdTrace = (key, name, color) => ({
+    x: rd.deltas, y: rd[key].mean, name, type: 'scatter', mode: 'lines+markers',
+    line: { color, width: 2.5 }, marker: { color, size: 7 },
+    error_y: { type: 'data', array: rd[key].std, visible: true, color, thickness: 1, width: 4 },
+    hovertemplate: '<b>' + name + '</b><br>δ = %{x}<br>PSNR = %{y:.2f} dB<extra></extra>'
+  });
+  Plotly.newPlot('plot-rate-distortion', [
+    rdTrace('omp', 'OMP', palette.omp),
+    rdTrace('fista', 'FISTA', palette.fista),
+    rdTrace('admm', 'ADMM', palette.admm)
+  ], Object.assign({}, baseLayout, {
+    title: { text: 'PSNR vs measurement rate δ = M/N', font: { color: fg, size: 14 } },
+    xaxis: Object.assign({}, baseLayout.xaxis, { title: 'measurement rate δ', dtick: 0.1 }),
+    yaxis: Object.assign({}, baseLayout.yaxis, { title: 'PSNR (dB)' })
+  }), config);
+
+  // ───── LISTA bars ─────
+  Plotly.newPlot('plot-lista', [{
+    x: ['ISTA', 'FISTA', 'LISTA'],
+    y: [0.4667, 0.3369, 0.0501],
+    type: 'bar',
+    marker: { color: [palette.ista, palette.fista, palette.lista] },
+    text: ['0.467', '0.337', '0.050'],
+    textposition: 'outside',
+    textfont: { color: fg },
+    hovertemplate: '<b>%{x}</b><br>NMSE = %{y:.4f}<extra></extra>'
+  }], Object.assign({}, baseLayout, {
+    title: { text: 'Validation NMSE at K = 10 (lower is better)', font: { color: fg, size: 14 } },
+    xaxis: Object.assign({}, baseLayout.xaxis, { title: 'solver' }),
+    yaxis: Object.assign({}, baseLayout.yaxis, { title: 'validation NMSE (log)', type: 'log' }),
+    showlegend: false
+  }), config);
+
+  // ───── Joint vs sequential (aggregate) ─────
+  const jvs = {
+    deltas: [0.20, 0.30, 0.40, 0.50, 0.60],
+    seq:   { mean: [10.717, 11.648, 12.513, 13.593, 13.402], std: [3.393, 3.754, 2.335, 2.421, 2.385] },
+    joint: { mean: [ 9.032, 10.271, 11.585, 12.759, 12.937], std: [1.565, 1.503, 1.641, 2.003, 1.998] }
+  };
+  const jvsBand = (key, name, color) => {
+    const upper = jvs[key].mean.map((m, i) => m + jvs[key].std[i]);
+    const lower = jvs[key].mean.map((m, i) => m - jvs[key].std[i]);
+    const rgba = (alpha) => {
+      const h = color.replace('#', '');
+      const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    };
+    return [
+      { x: jvs.deltas.concat(jvs.deltas.slice().reverse()),
+        y: upper.concat(lower.slice().reverse()),
+        fill: 'toself', fillcolor: rgba(0.12), line: { color: 'transparent' },
+        name: name + ' ±1σ', hoverinfo: 'skip', showlegend: false, type: 'scatter' },
+      { x: jvs.deltas, y: jvs[key].mean, name, type: 'scatter', mode: 'lines+markers',
+        line: { color, width: 2.5 }, marker: { color, size: 7 },
+        hovertemplate: '<b>' + name + '</b><br>δ = %{x}<br>PSNR = %{y:.2f} dB<extra></extra>' }
+    ];
+  };
+  Plotly.newPlot('plot-joint-vs-seq',
+    [].concat(jvsBand('seq', 'Sequential (CS → illum-correct)', palette.seq),
+              jvsBand('joint', 'Joint-CS', palette.joint)),
+    Object.assign({}, baseLayout, {
+      title: { text: 'Aggregate PSNR under 8× illumination gradient', font: { color: fg, size: 14 } },
+      xaxis: Object.assign({}, baseLayout.xaxis, { title: 'measurement rate δ', dtick: 0.1 }),
+      yaxis: Object.assign({}, baseLayout.yaxis, { title: 'PSNR (dB)' })
+    }), config);
+
+  // ───── Per-scene Δ (grouped bars) ─────
+  const scenes = ['cameraman', 'astronaut', 'coins', 'page', 'moon'];
+  const deltaPS = [0.20, 0.30, 0.40, 0.50, 0.60];
+  const psnrDiff = {
+    '0.20': [ 2.87,  0.54, -1.02, -0.79, -10.03],
+    '0.30': [ 4.65,  0.18, -1.73, -0.48,  -9.51],
+    '0.40': [ 1.13,  1.84,  0.39, -0.23,  -7.76],
+    '0.50': [ 1.08,  2.31,  0.74,  0.74,  -9.05],
+    '0.60': [ 3.07,  2.21,  0.32,  0.43,  -8.37]
+  };
+  const psColors = ['#9ec5e8', '#6aa3d4', '#0a4d8c', '#d1495b', '#7b1d2f'];
+  const psTraces = deltaPS.map((d, i) => ({
+    x: scenes,
+    y: psnrDiff[d.toFixed(2)],
+    name: 'δ = ' + d.toFixed(2),
+    type: 'bar',
+    marker: { color: psColors[i] },
+    hovertemplate: '<b>%{x}</b><br>δ = ' + d.toFixed(2) + '<br>Δ = %{y:.2f} dB<extra></extra>'
+  }));
+  Plotly.newPlot('plot-per-scene', psTraces, Object.assign({}, baseLayout, {
+    title: { text: 'Per-scene PSNR gain Δ = joint − sequential (dB)', font: { color: fg, size: 14 } },
+    barmode: 'group',
+    xaxis: Object.assign({}, baseLayout.xaxis, { title: 'scene' }),
+    yaxis: Object.assign({}, baseLayout.yaxis, { title: 'Δ PSNR (dB)', zeroline: true, zerolinewidth: 1.5, zerolinecolor: muted })
+  }), config);
+})();
+</script>
+
 </body>
 </html>
