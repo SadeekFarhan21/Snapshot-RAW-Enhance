@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "site/public",
+  "installCommand": "echo 'static site — skipping install'",
+  "buildCommand": "echo 'static site — nothing to build'",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
@@ -16,14 +19,7 @@
       ]
     },
     {
-      "source": "/paper/(.*)\\.pdf",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800, must-revalidate" },
-        { "key": "Content-Type", "value": "application/pdf" }
-      ]
-    },
-    {
-      "source": "/poster/(.*)\\.pdf",
+      "source": "/papers/(.*)\\.pdf",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800, must-revalidate" },
         { "key": "Content-Type", "value": "application/pdf" }
