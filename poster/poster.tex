@@ -1,4 +1,4 @@
-% Poster: Joint-CS -- Simultaneous Illumination Normalization and
+% Poster: our framework -- Simultaneous Illumination Normalization and
 % Sparse Image Compression via Unfolded Recovery
 % Dimensions: 48 in (wide) x 36 in (high), landscape.
 
@@ -50,7 +50,7 @@
 % Title
 % ====================
 
-\title{Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery}
+\title{Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery}
 
 \author{Farhan Sadeek\inst{1}}
 
@@ -109,7 +109,7 @@
       \begin{alertblock}{Our Contributions}
 
       \begin{enumerate}\setlength{\itemsep}{0.2em}
-          \item \textbf{Joint-CS objective.} A single $\ell_1{+}$smooth-prior
+          \item \textbf{our framework objective.} A single $\ell_1{+}$smooth-prior
             problem in $(\boldsymbol{c},\boldsymbol{g})$ solved by block-coordinate
             alternation: FISTA on $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
           \item \textbf{Deep-unfolded inner solver.} A $K{=}10$-layer
@@ -180,7 +180,7 @@
             divisor copies the gradient but cannot restore the
             information the over-shrinkage has already destroyed.
         \end{itemize}
-        Joint-CS estimates $\boldsymbol{c}$ and $\boldsymbol{g}$ together so the
+        our framework estimates $\boldsymbol{c}$ and $\boldsymbol{g}$ together so the
         $\ell_1$ prior sees the true sparse signal $\boldsymbol{s}$.
 
       \end{block}
@@ -210,7 +210,7 @@
 
       \medskip
 
-      \begin{block}{Method 1: Joint-CS Objective}
+      \begin{block}{Method 1: our framework Objective}
 
         \textbf{Replace} the two-stage pipeline with a single objective:
         \[
@@ -380,7 +380,7 @@
             \node[font=\scriptsize, anchor=north, text=black!65] at (12.8,-2.1)
             {$a^\star\!=\!\langle\hat{\boldsymbol{s}},\boldsymbol{s}\rangle/\|\hat{\boldsymbol{s}}\|^2$};
           \end{tikzpicture}
-          \caption{End-to-end Joint-CS. The RAW signal
+          \caption{End-to-end our framework. The RAW signal
             $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$ is measured via Gaussian
             $\boldsymbol{A}$; block-coordinate alternation recovers
             $(\boldsymbol{c},\boldsymbol{g})$ simultaneously; the scalar gain
@@ -566,7 +566,7 @@
               \legend{cameraman,astronaut,coins,page,moon}
             \end{axis}
           \end{tikzpicture}
-          \caption{Per-scene PSNR gain of Joint-CS over the sequential
+          \caption{Per-scene PSNR gain of our framework over the sequential
             baseline. Textured scenes (cameraman, astronaut) gain
             $+1.1$ to $+4.7$\,dB; coins/page are roughly a wash;
             \textbf{moon collapses by $\sim 8$\,dB} -- a real,

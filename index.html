@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</title>
-<meta name="description" content="Joint-CS: a single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned LISTA c-step." />
-<meta property="og:title" content="Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery" />
+<title>Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</title>
+<meta name="description" content="our framework: a single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned LISTA c-step." />
+<meta property="og:title" content="Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery" />
 <meta property="og:description" content="ENGS 109 final project — Farhan Sadeek, Thayer School of Engineering, Dartmouth College." />
 <meta property="og:image" content="figures/rate_distortion.png" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -252,7 +252,7 @@
 
 <header>
   <h1>
-    Joint-CS:
+    our framework:
     <span class="small">Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</span>
   </h1>
 
@@ -279,7 +279,7 @@
     discards information: sparse recovery applied to a signal whose dynamic
     range is dominated by an unknown multiplicative illumination field has
     weaker recovery guarantees than the same recovery applied to the
-    underlying reflectance. We formulate <em>Joint-CS</em>, a single inverse
+    underlying reflectance. We formulate our framework, a single inverse
     problem in the joint variables of DCT-domain reflectance coefficients
     and a smooth per-column illumination field, and solve it by
     block-coordinate alternation between a learned-iterative-shrinkage step
@@ -485,7 +485,7 @@
     <a href="paper/neurips_2026.pdf">Open in new tab</a> &middot;
     <a href="paper/neurips_2026.pdf" download>Download PDF</a>
   </p>
-  <iframe class="pdf-frame" src="paper/neurips_2026.pdf#view=FitH" title="Joint-CS paper PDF"></iframe>
+  <iframe class="pdf-frame" src="paper/neurips_2026.pdf#view=FitH" title="our framework paper PDF"></iframe>
 </section>
 
 <section id="poster-section">
@@ -495,7 +495,7 @@
       <a href="poster/poster.pdf">Open in new tab</a> &middot;
       <a href="poster/poster.pdf" download>Download PDF</a>
     </p>
-    <iframe class="pdf-frame" src="poster/poster.pdf#view=FitH" title="Joint-CS poster PDF"></iframe>
+    <iframe class="pdf-frame" src="poster/poster.pdf#view=FitH" title="our framework poster PDF"></iframe>
   </details>
 </section>
 
@@ -514,7 +514,7 @@ python3 experiments/joint_vs_sequential.py   # ~5 s</code></pre>
   <h2>BibTeX</h2>
 <pre><code>@misc{sadeek2026jointcs,
   author       = {Farhan Sadeek},
-  title        = {{Joint-CS}: Simultaneous Illumination Normalization
+  title        = {{our framework}: Simultaneous Illumination Normalization
                   and Sparse Image Compression via Unfolded Recovery},
   year         = {2026},
   howpublished = {ENGS 109 final project,
@@ -627,7 +627,7 @@ python3 experiments/joint_vs_sequential.py   # ~5 s</code></pre>
   };
   Plotly.newPlot('plot-joint-vs-seq',
     [].concat(jvsBand('seq', 'Sequential (CS → illum-correct)', palette.seq),
-              jvsBand('joint', 'Joint-CS', palette.joint)),
+              jvsBand('joint', 'our framework', palette.joint)),
     Object.assign({}, baseLayout, {
       title: { text: 'Aggregate PSNR under 8× illumination gradient', font: { color: fg, size: 14 } },
       xaxis: Object.assign({}, baseLayout.xaxis, { title: 'measurement rate δ', dtick: 0.1 }),

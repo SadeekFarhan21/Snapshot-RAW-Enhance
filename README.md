@@ -1,4 +1,4 @@
-# Snapshot RAW Enhance — Joint-CS
+# Snapshot RAW Enhance
 
 ENGS 109 final project: joint sparse recovery and illumination normalization for compressive sensing of RAW-like image signals, with a deep-unfolded LISTA solver.
 

@@ -1,4 +1,4 @@
-# Joint-CS: Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery
+# Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery
 
 _Draft — ENGS 109 final project. Sections III–IV are written; Sections I, II, V, VI are stubs filled in once the experiments complete._
 

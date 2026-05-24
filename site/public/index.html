@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</title>
+  <meta name="description" content="A single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned-ISTA c-step.">
+  <meta property="og:title" content="Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery">
+  <meta property="og:description" content="ENGS 109 final project, Dartmouth College. Six experiments, including a falsification of the proposed identifiability gate.">
+  <meta property="og:image" content="figures/rate_distortion.png">
+  <link rel="icon" type="image/svg+xml" href="https://www.farhansadeek.com/favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://distill.pub/template.v2.js"></script>
+  <style>
+    /* Light tweaks on top of the Distill base styles. */
+    d-article table {
+      border-collapse: collapse;
+      margin: 1rem 0;
+      width: 100%;
+    }
+    d-article table th,
+    d-article table td {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 0.4rem 0.7rem;
+      font-size: 0.94em;
+    }
+    d-article table thead th {
+      border-top: 2px solid rgba(0, 0, 0, 0.6);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+      text-align: center;
+      font-weight: 600;
+    }
+    d-article table thead th:first-child,
+    d-article table tbody td:first-child {
+      text-align: left;
+    }
+    d-article table tbody td {
+      text-align: center;
+    }
+    d-article table tbody tr:last-child td {
+      border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+    }
+    d-article figure img {
+      width: 100%;
+    }
+    d-article figure figcaption {
+      font-size: 0.88em;
+      color: rgba(0, 0, 0, 0.6);
+      margin-top: 0.5rem;
+    }
+    d-article .highlight {
+      color: #b3322c;
+    }
+    d-article code {
+      background: rgba(0, 0, 0, 0.04);
+      padding: 0.05em 0.3em;
+      border-radius: 3px;
+      font-size: 0.92em;
+    }
+    /* Paper-links button bar (icon buttons under the abstract). */
+    d-title .button-container {
+      grid-column: text;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1.5rem 0 0;
+      flex-wrap: wrap;
+    }
+    d-title .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
+      border: 1px solid rgba(0, 0, 0, 0.85);
+    }
+    d-title .icon-btn i { font-size: 1em; line-height: 1; }
+    d-title .icon-btn.primary { background: #000; color: #fff; }
+    d-title .icon-btn.primary:hover { background: #222; }
+    d-title .icon-btn.secondary { background: #fff; color: #000; }
+    d-title .icon-btn.secondary:hover { background: #f4f4f4; }
+    d-title .icon-btn:active { transform: translateY(1px); }
+    /* Sticky table of contents in the left margin (wide screens only). */
+    nav.toc { display: none; }
+    @media (min-width: 1180px) {
+      nav.toc {
+        display: block;
+        grid-column: screen-start / text-start;
+        justify-self: end;
+        padding: 0 1.5rem 0 1rem;
+        max-width: 320px;
+        position: sticky;
+        top: 1rem;
+        align-self: start;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      nav.toc h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 0.75rem;
+        color: rgba(0, 0, 0, 0.85);
+      }
+      nav.toc ul { list-style: none; padding: 0; margin: 0; }
+      nav.toc li { margin: 0.35rem 0; }
+      nav.toc li.toc-h2 > a { font-weight: 600; color: rgba(0, 0, 0, 0.85); }
+      nav.toc li.toc-h3 { padding-left: 1rem; }
+      nav.toc li.toc-h3 > a { color: rgba(0, 0, 0, 0.65); font-weight: 400; }
+      nav.toc a { text-decoration: none; border-bottom: none; }
+      nav.toc a:hover { color: rgba(0, 0, 0, 1); text-decoration: underline; }
+    }
+    /* Hide auto-generated DOI block in d-byline and rebalance columns. */
+    d-byline .byline > div:last-child { display: none; }
+    @media (min-width: 768px) {
+      d-byline .byline { grid-template-columns: 1fr 1fr 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+      "title": "Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery",
+      "description": "A single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned-ISTA c-step. Six experiments on a 5-image natural-scene benchmark, including a falsification of the proposed identifiability gate.",
+      "published": "May 24, 2026",
+      "authors": [
+        {
+          "author": "Farhan Sadeek",
+          "authorURL": "mailto:farhan.sadeek.29@dartmouth.edu",
+          "affiliations": [{"name": "Dartmouth College"}]
+        }
+      ],
+      "katex": {
+        "delimiters": [
+          {"left": "$$", "right": "$$", "display": true},
+          {"left": "$", "right": "$", "display": false}
+        ]
+      }
+    }</script>
+  </d-front-matter>
+
+  <d-title>
+    <h1>Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery</h1>
+    <p>The traditional camera pipeline samples at Shannon&ndash;Nyquist rates, compresses to a sparse representation, and only afterwards performs illumination correction on the decoded image. We instead solve a single inverse problem in <em>(reflectance, illumination)</em> jointly, replacing the conventional CS&ndash;then&ndash;ISP order with one block-coordinate optimization. The joint pipeline beats sequential by up to <strong>4.7&nbsp;dB</strong> on textured scenes, and we report a clean failure mode on near-uniform scenes that explicitly <strong>falsifies</strong> the $\kappa(B^\top B)$ identifiability gate one would naturally propose.</p>
+    <div class="button-container">
+      <a href="papers/paper.pdf" class="icon-btn secondary">
+        <i class="fa-solid fa-file-arrow-down"></i> Download PDF
+      </a>
+      <a href="https://github.com/SadeekFarhan21/Snapshot-RAW-Enhance" class="icon-btn secondary">
+        <i class="fa-solid fa-code"></i> View Code
+      </a>
+    </div>
+  </d-title>
+
+  <d-byline></d-byline>
+
+  <d-article>
+
+    <nav class="toc" aria-label="Table of contents">
+      <h3>Contents</h3>
+      <ul>
+        <li class="toc-h2"><a href="#intro">1. Introduction</a></li>
+        <li class="toc-h2"><a href="#related">2. Related work</a></li>
+        <li class="toc-h2"><a href="#prelim">3. Mathematical preliminaries</a></li>
+        <li class="toc-h3"><a href="#prelim">3.1 Measurement model</a></li>
+        <li class="toc-h3"><a href="#prelim">3.2 Sparsity, convex relaxation</a></li>
+        <li class="toc-h3"><a href="#prelim">3.3 Classical solvers</a></li>
+        <li class="toc-h2"><a href="#method">4. Proposed method</a></li>
+        <li class="toc-h3"><a href="#method">4.1 Image formation</a></li>
+        <li class="toc-h3"><a href="#method">4.2 Joint objective</a></li>
+        <li class="toc-h3"><a href="#method">4.3 Deep-unfolded inner solver</a></li>
+        <li class="toc-h2"><a href="#experiments">5. Experiments</a></li>
+        <li class="toc-h3"><a href="#phase">5.1 Phase transition</a></li>
+        <li class="toc-h3"><a href="#rd">5.2 Rate&ndash;distortion</a></li>
+        <li class="toc-h3"><a href="#lista">5.3 LISTA vs classical</a></li>
+        <li class="toc-h3"><a href="#joint-vs-seq">5.4 Joint vs sequential</a></li>
+        <li class="toc-h3"><a href="#noise">5.5 Noise robustness</a></li>
+        <li class="toc-h3"><a href="#gate">5.6 Identifiability gate (falsification)</a></li>
+        <li class="toc-h2"><a href="#conclusion">6. Conclusion</a></li>
+      </ul>
+    </nav>
+
+    <h2 id="intro">1.&nbsp;Introduction</h2>
+
+    <p>Modern imaging pipelines acquire $N$ pixels via Nyquist sampling, then immediately throw most of that information away: a typical JPEG keeps only ${\sim}5\%$&ndash;$10\%$ of the DCT coefficients above the quantization floor, and the image signal processor (ISP) further reshapes the data through demosaicing, tone-mapping, and white-balance correction. <strong>Compressed sensing</strong> (CS) reverses this order. If the signal $x$ is $S$-sparse in some basis $\Psi$, then $M \ll N$ random linear measurements $y = Ax + w$ suffice to recover $x$ exactly (up to noise) by $\ell_1$ minimization, provided $A$ obeys the restricted isometry property<d-cite key="candes2006stable,donoho2006compressed"></d-cite>.</p>
+
+    <p>CS has been extensively studied for compression. It has been less studied as an integrated stage of a RAW image-signal pipeline. The crux is that a RAW sensor measures the product</p>
+
+    <d-math block>x = s \odot g,</d-math>
+
+    <p>where $s$ is the underlying scene reflectance (sparse in the DCT) and $g$ is a spatially-varying illumination field (smooth, not sparse). A sequential pipeline &mdash; CS recovery of $x$, then a downstream divide-by-illumination step &mdash; wastes the prior that <em>$s$, not $x$, is sparse in $\Psi$</em>. Multiplying a DCT-sparse signal by an arbitrary illumination field destroys the sparsity that the $\ell_1$ regularizer is trying to exploit; the recovered $x$ then carries an illumination-shaped bias that no downstream column-mean correction can fully undo.</p>
+
+    <h3>Contributions</h3>
+
+    <ol>
+      <li>We formulate our framework: a joint $\ell_1$/smooth-prior objective in $(c, g)$ that performs sparse recovery and illumination correction in a single optimization, and we derive a block-coordinate solver with a FISTA inner loop on $c$ and a closed-form ridge step on $g$.</li>
+      <li>We deep-unfold the $c$-step into a learned $K{=}10$-layer LISTA network<d-cite key="gregor2010lista"></d-cite> and stabilize its training under sustained Adam with gradient clipping and best-checkpoint restoration.</li>
+      <li>We benchmark the full system across <em>six</em> experiments. The headline result is the per-scene gain on textured natural images. <span class="highlight">The most informative <em>negative</em> result is that the $\kappa(B^\top B)$ gate one would naturally propose for the joint pipeline's failure mode is empirically <em>false</em>.</span></li>
+    </ol>
+
+    <h2 id="related">2.&nbsp;Related work</h2>
+
+    <p><em>Compressed sensing foundations.</em> The sparse-recovery theory underlying this paper is laid out in detail in the monographs of Elad<d-cite key="elad2010sparse"></d-cite> and Foucart and Rauhut<d-cite key="foucart2013mathematical"></d-cite>. Reconstruction guarantees for $\ell_1$ minimization were established under the restricted isometry property (RIP)<d-cite key="candes2006stable,donoho2006compressed"></d-cite>; the geometric phase-transition picture we reproduce empirically in <a href="#phase">Section&nbsp;5.1</a> is due to Donoho and Tanner<d-cite key="donoho2009observed"></d-cite>. Greedy alternatives (OMP and its variants) were analyzed by Tropp and Gilbert<d-cite key="tropp2007signal"></d-cite>; proximal-gradient solvers for the Lasso are surveyed by FISTA<d-cite key="beck2009fast"></d-cite> and ADMM<d-cite key="boyd2011distributed"></d-cite>.</p>
+
+    <p><em>Learned sparse coders.</em> Replacing iterative solvers with learned, finite-depth networks was introduced by Gregor and LeCun<d-cite key="gregor2010lista"></d-cite>. We use the original tied-weight LISTA as a baseline because it is the cleanest fixed point for an ENGS&nbsp;109 final project.</p>
+
+    <p><em>CS and ISP integration.</em> Most prior work on CS imaging treats sparse recovery and downstream image-signal processing as a strict pipeline. To our knowledge, no prior work reports the scene-dependent identifiability failure we identify in <a href="#gate">Section&nbsp;5.6</a>.</p>
+
+    <h2 id="prelim">3.&nbsp;Mathematical preliminaries</h2>
+
+    <h3>3.1&nbsp;Measurement model</h3>
+
+    <p>The CS forward model treats image acquisition as a linear measurement:</p>
+
+    <d-math block>y = A x + w, \qquad y \in \mathbb{R}^M,\; A \in \mathbb{R}^{M \times N},\; x \in \mathbb{R}^N,\; \|w\|_2 \le \epsilon,</d-math>
+
+    <p>with $M \ll N$. The sensing matrix $A$ models the physical encoder (a coded-aperture mask, a random projection circuit, or in this work a column-normalized i.i.d.&nbsp;Gaussian ensemble), and $w$ collects shot, read, and quantization noise.</p>
+
+    <h3>3.2&nbsp;Sparsity prior and convex relaxation</h3>
+
+    <p>The unknown signal is $S$-sparse in some basis $\Psi$, i.e. $x = \Psi c$ with $c \in \Sigma_S \equiv \{c \in \mathbb{R}^N \mid \|c\|_0 \le S\}$. Direct minimization of the $\ell_0$ count is combinatorial. Under the RIP with constant $\delta_{2S} &lt; \sqrt{2}-1$, the convex relaxation</p>
+
+    <d-math block>c_1^{\epsilon} = \arg\min_{c}\; \|c\|_1 \quad \text{s.t.} \quad \|A \Psi c - y\|_2 \le \epsilon</d-math>
+
+    <p>recovers $c$ to within $O(\epsilon)$<d-cite key="candes2006stable"></d-cite>. Equivalently, the Lasso form $c_\lambda = \arg\min_c \tfrac{1}{2}\|A\Psi c - y\|_2^2 + \lambda \|c\|_1$ is solved efficiently with proximal-gradient methods.</p>
+
+    <h3>3.3&nbsp;Classical solvers</h3>
+
+    <p><em>OMP</em><d-cite key="tropp2007signal"></d-cite> iteratively selects the column of $A\Psi$ most correlated with the current residual and re-fits the active support by least squares. It can recover supports up to $S \lesssim M / \log N$.</p>
+
+    <p><em>ISTA / FISTA</em><d-cite key="beck2009fast"></d-cite>. ISTA is the proximal-gradient method for the Lasso:</p>
+
+    <d-math block>c^{(k+1)} = \mathcal{S}_{\lambda/L}\!\left( c^{(k)} - \tfrac{1}{L} (A\Psi)^\top \!\left( A\Psi c^{(k)} - y \right) \right),</d-math>
+
+    <p>where $L = \|(A\Psi)^\top A\Psi\|_2$ and $\mathcal{S}_\tau(z) = \mathrm{sign}(z)\max(|z|-\tau, 0)$. FISTA adds a Nesterov momentum term and improves the objective-gap rate from $O(1/k)$ to $O(1/k^2)$.</p>
+
+    <p><em>ADMM</em><d-cite key="boyd2011distributed"></d-cite> introduces a splitting variable $z$ with constraint $c = z$, alternating a least-squares update on $c$ (cached Cholesky of $(A\Psi)^\top A\Psi + \rho I$) with a soft-threshold update on $z$.</p>
+
+    <h2 id="method">4.&nbsp;Proposed method</h2>
+
+    <h3>4.1&nbsp;Image-formation model with illumination</h3>
+
+    <p>We assume the RAW signal follows $x = s \odot g$. The conventional pipeline first recovers $x$, then divides out $g$. The ordering wastes the prior that $s$ is sparse in $\Psi$ but $x$ is not: pointwise multiplication by an illumination field destroys DCT-domain sparsity, the $\ell_1$ regularizer over-shrinks the coefficients corresponding to high-illumination columns, and the post-hoc correction can only rescale (not restore) what was lost.</p>
+
+    <h3>4.2&nbsp;Joint objective</h3>
+
+    <p>We instead minimize a single objective in $(c, g)$:</p>
+
+    <d-math block>\min_{c,\,g}\; \tfrac{1}{2}\big\|A\,\mathrm{diag}(g_\text{pix})\, \Psi c - y\big\|_2^2 + \lambda_c \|c\|_1 + \lambda_g \|\nabla g\|_2^2,</d-math>
+
+    <p>where $g_\text{pix}$ tiles a per-column gain vector $g \in \mathbb{R}^{\sqrt{N}}$ over rows, and $\nabla$ is a 1D discrete gradient enforcing smoothness on the illumination. The problem is jointly non-convex but block-convex. We minimize by alternating:</p>
+
+    <ul>
+      <li><em>c-step.</em> With $g$ fixed, $A_{\text{eff}}(g) = A\,\mathrm{diag}(g_\text{pix})\,\Psi$, and the $c$-update is a standard Lasso solved with FISTA.</li>
+      <li><em>g-step.</em> With $c$ fixed, let $\hat{s} = \Psi c$ and reshape to $\hat{S}_{ij}$. The measurement model is linear in $g$: $y = B(\hat{s})\,g + w$ with $B_{m,j} = \sum_i A_{m, i\sqrt{N} + j}\,\hat{S}_{ij}$, and the closed-form ridge solution is $g^\star = (B^\top B + \lambda_g L)^{-1} B^\top y$, where $L = \nabla^\top \nabla$.</li>
+    </ul>
+
+    <p><em>Gain ambiguity.</em> The model has a scalar ambiguity: for any $a &gt; 0$, the pairs $(s, g)$ and $(a s,\, g/a)$ produce identical measurements. We resolve it at evaluation time by computing the optimal positive gain $a^\star = \langle \hat{s}, s_\text{true}\rangle / \|\hat{s}\|^2$ and apply the same rule to the sequential baseline.</p>
+
+    <h3>4.3&nbsp;Deep-unfolded inner solver (LISTA)</h3>
+
+    <p>A practical limitation of ISTA/FISTA is the iteration count &mdash; hundreds at deployment. We replace the $c$-step with $K$ unrolled ISTA layers whose encoder, recurrent, and threshold parameters are <em>learned</em><d-cite key="gregor2010lista"></d-cite>:</p>
+
+    <d-math block>c^{(k+1)} = \mathcal{S}_{\theta_k}\!\big(W_t c^{(k)} + W_e y\big),\quad k = 0, \dots, K-1.</d-math>
+
+    <p>Initializing $W_e = (1/L)(A\Psi)^\top$, $W_t = I - (1/L)(A\Psi)^\top A\Psi$, and $\theta_k = \lambda/L$ exactly reproduces ISTA at training-step zero. End-to-end training on supervised $(y, c)$ pairs minimizes MSE on $c$ and lets the thresholds adapt.</p>
+
+    <aside><em>Training stability.</em> The $K$-layer recurrence is sensitive to the spectral radius of $W_t$. With Adam at $\text{lr}{=}5{\times}10^{-3}$, training first descended cleanly to NMSE${=}0.12$ at epoch&nbsp;10, then blew up to ${\sim}10^3$ for several epochs before re-stabilizing. We adopt gradient-norm clipping at $1.0$, lr ${=}10^{-3}$, and best-checkpoint restore. Stable across seeds.</aside>
+
+    <h2 id="experiments">5.&nbsp;Experiments</h2>
+
+    <p>All experiments use Python&nbsp;3, NumPy, SciPy, scikit-image, and PyTorch (CPU). RNGs are seeded. The sensing matrix is column-normalized i.i.d.&nbsp;Gaussian unless stated otherwise. <em>Note: on multi-core machines, set <code>OPENBLAS_NUM_THREADS=2</code> to avoid small-matrix thread-contention slowdowns.</em></p>
+
+    <h3 id="phase">5.1&nbsp;Phase transition</h3>
+
+    <p>We fix $N = 200$ and sweep $\delta = M/N$ and $\rho = S/M$ over a $19 \times 19$ grid, $20$ trials per cell, zero noise. A trial succeeds if NMSE $&lt; 10^{-3}$. Both solvers exhibit a sharp empirical Donoho&ndash;Tanner transition. OMP wins at small $\delta$ (extreme undersampling); FISTA overtakes OMP as $\delta$ grows. Crossover near $\delta \approx 0.65$.</p>
+
+    <figure>
+      <img src="figures/phase_transition.png" alt="Phase transition for OMP and FISTA">
+      <figcaption><em>Figure 1.</em> Empirical phase transition for OMP (left) and FISTA (right) on Gaussian CS, $N = 200$. Color is success rate over $20$ trials.</figcaption>
+    </figure>
+
+    <table>
+      <thead><tr><th>$\delta$</th><th>0.30</th><th>0.50</th><th>0.70</th><th>0.90</th></tr></thead>
+      <tbody>
+        <tr><td>OMP $\rho^\star$</td><td>0.35</td><td>0.40</td><td>0.40</td><td>0.50</td></tr>
+        <tr><td>FISTA $\rho^\star$</td><td>0.20</td><td>0.30</td><td>0.50</td><td>0.65</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="rd">5.2&nbsp;Rate-distortion on a 5-image natural-scene set</h3>
+
+    <p>Test set from <code>scikit-image</code>: <em>cameraman, astronaut, coins, page, moon</em>. Each image: grayscale, $64 \times 64$, $[0, 1]$, $16 \times 16$ blocks, 2D-DCT basis, Gaussian sensing, SNR${=}30$&nbsp;dB. PSNR mean &plusmn; std across the 5-image set:</p>
+
+    <table>
+      <thead><tr><th>$\delta$</th><th>OMP</th><th>FISTA</th><th>ADMM</th></tr></thead>
+      <tbody>
+        <tr><td>0.10</td><td>15.46 &plusmn; 4.4</td><td>16.67 &plusmn; 4.8</td><td>11.23 &plusmn; 3.1</td></tr>
+        <tr><td>0.30</td><td>19.15 &plusmn; 4.0</td><td>21.73 &plusmn; 4.3</td><td>21.27 &plusmn; 4.6</td></tr>
+        <tr><td>0.50</td><td>21.73 &plusmn; 3.2</td><td>25.06 &plusmn; 3.9</td><td>24.98 &plusmn; 4.0</td></tr>
+        <tr><td>0.70</td><td>24.89 &plusmn; 3.0</td><td>27.57 &plusmn; 3.5</td><td>27.45 &plusmn; 3.7</td></tr>
+      </tbody>
+    </table>
+
+    <p>FISTA and ADMM track each other within ${\sim}0.5$&nbsp;dB once $\delta \ge 0.2$ (same Lasso objective). Both beat OMP by 2 to 3&nbsp;dB at every $\delta \ge 0.2$. The ${\sim}3$ to ${\sim}4$&nbsp;dB std reflects per-image difficulty: <em>moon</em> easiest, <em>coins</em> hardest.</p>
+
+    <figure>
+      <img src="figures/rate_distortion.png" alt="Rate-distortion curves">
+      <figcaption><em>Figure 2.</em> PSNR (left) and SSIM (right) vs measurement rate $\delta$, mean &plusmn; std across 5 scenes.</figcaption>
+    </figure>
+
+    <h3 id="lista">5.3&nbsp;LISTA vs.&nbsp;classical solvers at matched compute</h3>
+
+    <p>Train $K = 10$-layer LISTA (tied $W_e, W_t$, per-layer learned $\theta_k$) on $5000$ synthetic $(y, c)$ pairs at $N{=}200, M{=}80, S{=}10$, SNR${=}30$&nbsp;dB. Compare against ISTA/FISTA at exactly $K = 10$ iterations.</p>
+
+    <table>
+      <thead><tr><th>Solver</th><th>Iterations / Layers</th><th>Val NMSE</th></tr></thead>
+      <tbody>
+        <tr><td>ISTA</td><td>10</td><td>0.4667</td></tr>
+        <tr><td>FISTA</td><td>10</td><td>0.3369</td></tr>
+        <tr><td>LISTA</td><td>10</td><td>0.0501</td></tr>
+        <tr><td>FISTA (matched NMSE)</td><td>22</td><td>&asymp; 0.05</td></tr>
+        <tr><td>FISTA (converged)</td><td>500</td><td>0.0050</td></tr>
+      </tbody>
+    </table>
+
+    <p>LISTA reaches at $K{=}10$ what FISTA needs $22$ iterations to reach &mdash; a ${\sim}2.2\times$ iteration speedup at the same recovery quality. LISTA still trails the converged $\ell_1$ minimum by ${\sim}10\times$ but amortizes that gap into a much smaller inference cost.</p>
+
+    <figure>
+      <img src="figures/lista_comparison.png" alt="LISTA training curve and matched-compute comparison">
+      <figcaption><em>Figure 3.</em> Left: LISTA training curve. Right: validation NMSE vs iteration count for ISTA/FISTA, with LISTA's $K{=}10$ NMSE as the horizontal dashed line.</figcaption>
+    </figure>
+
+    <h3 id="joint-vs-seq">5.4&nbsp;Joint vs.&nbsp;sequential under an 8&times; illumination gradient</h3>
+
+    <p>For each scene we extract a $16 \times 16$ center patch, $[0,1]$-normalize, multiply by a horizontal gradient $g_j = 1 + 7(j/15)$ (factor-of-8 swing), Gaussian CS at SNR${=}25$&nbsp;dB, and recover via two pipelines:</p>
+
+    <ul>
+      <li><em>Sequential.</em> FISTA on raw measurements in DCT domain, then post-hoc per-column illumination correction by dividing out column means.</li>
+      <li><em>Joint.</em> Eight outer iterations of the block-coordinate scheme above.</li>
+    </ul>
+
+    <p>Per-scene $\Delta = \text{PSNR}_{\text{joint}} - \text{PSNR}_{\text{seq}}$ (dB) under the $8\times$ gradient (positive numbers mean joint wins):</p>
+
+    <table>
+      <thead><tr><th>$\delta$</th><th>cameraman</th><th>astronaut</th><th>coins</th><th>page</th><th>moon</th></tr></thead>
+      <tbody>
+        <tr><td>0.20</td><td>2.87</td><td>0.54</td><td>&minus;1.02</td><td>&minus;0.79</td><td>&minus;10.03</td></tr>
+        <tr><td>0.30</td><td>4.65</td><td>0.18</td><td>&minus;1.73</td><td>&minus;0.48</td><td>&minus;9.51</td></tr>
+        <tr><td>0.40</td><td>1.13</td><td>1.84</td><td>0.39</td><td>&minus;0.23</td><td>&minus;7.76</td></tr>
+        <tr><td>0.50</td><td>1.08</td><td>2.31</td><td>0.74</td><td>0.74</td><td>&minus;9.05</td></tr>
+        <tr><td>0.60</td><td>3.07</td><td>2.21</td><td>0.32</td><td>0.43</td><td>&minus;8.37</td></tr>
+      </tbody>
+    </table>
+
+    <p>Three regimes: (1) <em>joint wins on textured scenes</em> (cameraman, astronaut), the regime the method was designed for; (2) <em>joint is a wash on moderate-content scenes</em> (coins, page); (3) <em>joint catastrophically fails on near-uniform scenes</em> (moon). Excluding moon, joint dominates at every $\delta$ by 0.4 to 1.5&nbsp;dB.</p>
+
+    <figure>
+      <img src="figures/joint_vs_sequential.png" alt="Joint vs sequential PSNR/SSIM">
+      <figcaption><em>Figure 4.</em> Joint vs sequential, mean &plusmn; std across 5 scenes. The full-set mean is dragged below sequential by the <em>moon</em> outlier; excluding moon, joint dominates everywhere.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="figures/joint_vs_sequential_qualitative.png" alt="Qualitative reconstruction comparison">
+      <figcaption><em>Figure 5.</em> Qualitative reconstructions on cameraman. Top: ground truth. Middle: sequential. Bottom: proposed. Sequential shows wash-out on the bright side and crush on the dark side; joint preserves both.</figcaption>
+    </figure>
+
+    <h3 id="noise">5.5&nbsp;Noise robustness sweep</h3>
+
+    <p>Fix $\delta = 0.4$ ($M = 102$, $N = 256$, single $16 \times 16$ center patch per scene). Sweep measurement SNR across $\{5, 10, 15, 20, 25, 35\}$&nbsp;dB. $\lambda$ scales with the noise level.</p>
+
+    <table>
+      <thead><tr><th>SNR (dB)</th><th>$\lambda$</th><th>OMP</th><th>FISTA</th><th>ADMM</th></tr></thead>
+      <tbody>
+        <tr><td>5</td><td>0.200</td><td>8.37 &plusmn; 0.76</td><td>10.39 &plusmn; 0.94</td><td>10.39 &plusmn; 0.94</td></tr>
+        <tr><td>15</td><td>0.050</td><td>14.16 &plusmn; 1.47</td><td>15.59 &plusmn; 1.64</td><td>15.40 &plusmn; 1.62</td></tr>
+        <tr><td>25</td><td>0.020</td><td>15.85 &plusmn; 1.94</td><td>17.21 &plusmn; 1.63</td><td>16.08 &plusmn; 1.96</td></tr>
+        <tr><td>35</td><td>0.008</td><td>16.60 &plusmn; 1.39</td><td>17.35 &plusmn; 2.12</td><td>12.95 &plusmn; 1.69</td></tr>
+      </tbody>
+    </table>
+
+    <p>PSNR rises roughly linearly in SNR (dB) up to ${\sim}20$&nbsp;dB and then <strong>plateaus at ${\sim}17$&nbsp;dB</strong>. At this $\delta$, the bottleneck above 20&nbsp;dB is no longer noise but the basis mismatch between the fixed 2D-DCT and the true patch content. FISTA dominates throughout. <strong>ADMM exhibits a clear failure at $35$&nbsp;dB</strong> (12.95 vs FISTA's 17.35): the small $\lambda = 0.008$ combined with fixed $\rho = 1.0$ leaves the splitting badly tuned. Takeaways: FISTA is the robust default; ADMM needs adaptive $\rho$; lifting the 17-dB ceiling requires a stronger sparsifying prior than the fixed DCT (a learned dictionary or NMF).</p>
+
+    <figure>
+      <img src="figures/noise_robustness.png" alt="PSNR vs SNR for OMP, FISTA, ADMM">
+      <figcaption><em>Figure 6.</em> Reconstruction PSNR vs measurement SNR at $\delta = 0.4$, mean &plusmn; std across 5 scenes. Plateau above 20&nbsp;dB signals basis mismatch is the bottleneck; ADMM's drop at 35&nbsp;dB is a $\rho$-tuning failure.</figcaption>
+    </figure>
+
+    <h3 id="gate">5.6&nbsp;Identifiability gate: $\kappa(B^\top B)$ does <em>not</em> predict joint failure</h3>
+
+    <p>The catastrophic moon result of &sect;5.4 prompted the hypothesis that the joint pipeline fails when the column-gain Gram matrix $B^\top B$ is ill-conditioned, suggesting a deployable gate based on $\kappa(B^\top B)$. <em>We test that hypothesis directly. It is empirically falsified.</em></p>
+
+    <p>For each scene we record $\log_{10} \kappa(B^\top B)$ measured after the first $c$-step of the joint pipeline (the latest moment a deployed gate would still be cheap to query), along with per-scene PSNR of sequential and joint reconstructions. We then sweep a gate threshold $\tau$, defining the gated reconstruction as joint if $\log_{10}\kappa &lt; \tau$ else sequential. Setup: $\delta = 0.4$, SNR${=}25$&nbsp;dB, $8\times$ gradient.</p>
+
+    <table>
+      <thead><tr><th>scene</th><th>$\log_{10}\kappa(B^\top B)$</th><th>PSNR seq</th><th>PSNR joint</th><th>$\Delta$</th></tr></thead>
+      <tbody>
+        <tr><td>cameraman</td><td>1.36</td><td>6.10</td><td>10.65</td><td>4.54</td></tr>
+        <tr><td>coins</td><td>1.37</td><td>6.35</td><td>10.14</td><td>3.78</td></tr>
+        <tr><td>astronaut</td><td>1.86</td><td>13.15</td><td>13.31</td><td>0.16</td></tr>
+        <tr><td>page</td><td>1.79</td><td>12.07</td><td>10.28</td><td>&minus;1.79</td></tr>
+        <tr><td><em>moon</em></td><td><em>1.11</em></td><td>16.49</td><td>8.22</td><td><em>&minus;8.27</em></td></tr>
+      </tbody>
+    </table>
+
+    <p><span class="highlight"><strong>Moon &mdash; the worst-performing scene for the joint pipeline &mdash; has the <em>lowest</em> $\log_{10}\kappa$.</strong></span> The best $\kappa$-gate found by sweep ($\tau^\star = 1.37$) recovers only 0.02&nbsp;dB on average over sequential-only, because it correctly routes <em>cameraman</em> and <em>coins</em> to joint but still routes <em>moon</em> to joint and misroutes <em>page</em> away from sequential.</p>
+
+    <p>The mechanism behind the moon failure is therefore not Gram-matrix rank-deficiency: it is <strong>scene-energy deficiency</strong>. The $c$-step on a near-uniformly-dark patch produces a near-zero scene estimate; the rows of $B$ are correspondingly small in absolute terms even if their conditioning is fine; any noise then dominates the $g$-update. A correct gate would key on the <em>magnitude</em> of $\hat{s}$ (e.g., $\|\hat{s}\|_2$ or its total variance) rather than $\kappa$. We mark this as a corrected, sharper version of the open problem.</p>
+
+    <figure>
+      <img src="figures/identifiability_gate.png" alt="Identifiability gate sweep and per-scene scatter">
+      <figcaption><em>Figure 7.</em> Left: mean PSNR as a function of the gate threshold $\tau$ on $\log_{10}\kappa$. Best $\tau^\star = 1.37$ achieves essentially zero advantage over sequential-only. Right: per-scene joint-minus-sequential gain vs $\log_{10}\kappa$. The expected monotone relationship is absent &mdash; moon sits in the bottom-left, opposite to what the gate hypothesis predicts.</figcaption>
+    </figure>
+
+    <h2 id="conclusion">6.&nbsp;Conclusion and future work</h2>
+
+    <p>We presented our framework, a single-stage compressive-sensing formulation that recovers a sparse reflectance image and a smooth illumination field simultaneously, replacing the conventional sequential CS-then-ISP ordering. The joint objective is block-convex with a fast FISTA inner loop and a closed-form ridge step on the illumination, and the $c$-step can be deep-unfolded into a learned $K$-layer LISTA. On a 5-scene $8\times$-illumination-gradient benchmark the joint pipeline outperforms a strong sequential baseline by up to 4.7&nbsp;dB on textured scenes; the LISTA inner solver matches at $K{=}10$ what FISTA needs $22$ iterations to reach.</p>
+
+    <h3>Limitations</h3>
+    <ul>
+      <li><em>Scene-energy-dependent failure.</em> On near-uniform scenes the $c$-step on a near-zero patch yields tiny rows of $B$, noise dominates the $g$-update, and the joint pipeline degrades by ${\sim}8$&nbsp;dB. We originally hypothesized this was a $B^\top B$ conditioning issue but &sect;5.6 falsifies that hypothesis. The correct gate signal is the magnitude of the first $c$-step's reconstruction, not its conditioning.</li>
+      <li><em>PSNR ceiling from basis mismatch.</em> Above ${\sim}20$&nbsp;dB SNR the reconstruction PSNR plateaus at ${\sim}17$&nbsp;dB regardless of additional noise headroom &mdash; the fixed 2D-DCT is the bottleneck.</li>
+      <li><em>Block-coordinate non-convexity.</em> The scheme is non-convex jointly and could converge to a local minimum if initialized poorly.</li>
+      <li><em>1D illumination model.</em> The per-column gain is sufficient for the horizontal gradient we study but inadequate for a fully 2D vignette or color-channel cross-talk.</li>
+      <li><em>ADMM tuning.</em> Fixed $\rho = 1.0$ destabilizes ADMM at very low noise.</li>
+      <li><em>LISTA generalization.</em> LISTA was trained on synthetic sparse $c$ at fixed sparsity and SNR.</li>
+      <li><em>Hardware validation.</em> All measurements are simulated (Gaussian CS); a real optical capture remains future work.</li>
+    </ul>
+
+    <h3>Future work</h3>
+    <ol>
+      <li>Replace the fixed 2D-DCT with a <strong>learned overcomplete dictionary</strong> via K-SVD<d-cite key="elad2010sparse"></d-cite> &mdash; the most direct route to lifting the ${\sim}17$&nbsp;dB ceiling. A non-negative variant (NMF) would additionally enforce the physical non-negativity of $g$ for hyperspectral or radiometric data.</li>
+      <li>Build a <strong>scene-energy</strong> identifiability gate that thresholds the first $c$-step's $\|\hat{s}\|_2$ (rather than the $\kappa$-gate falsified in &sect;5.6) and falls back to sequential when below threshold.</li>
+      <li>Replace the diagonal illumination matrix with a <strong>learned spatially-varying point-spread function</strong> &mdash; would let our framework would jointly deblur, denoise, and white-balance, and would likely fix the moon-failure mode by sharing information across columns.</li>
+      <li><strong>Deep-unfold the outer block-coordinate loop</strong> &mdash; not just the $c$-step &mdash; so learned thresholds depend on the current illumination estimate.</li>
+      <li>Implement $A$ in <strong>physical optical hardware</strong> (coded apertures, metasurfaces) to close the loop from algorithm to camera.</li>
+    </ol>
+
+  </d-article>
+
+  <d-appendix>
+    <h3>Acknowledgements</h3>
+    <p>This work was carried out as a final project for ENGS&nbsp;109 (High-dimensional Sensing and Learning) at Dartmouth College.</p>
+
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+  </d-appendix>
+
+</body>
+</html>

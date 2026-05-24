@@ -1,6 +1,6 @@
-# Joint-CS Experimental Results
+# Experimental Results
 
-This document records the experiments run for the Joint-CS project. All
+This document records the experiments run for our project. All
 numbers are produced by scripts in `experiments/`; see the JSON files in
 `results/` for the raw outputs and `figures/` for the generated plots.
 
@@ -166,9 +166,70 @@ essentially a copy of the gradient, applied unconditionally. When the
 underlying scene is too sparse to identify $\boldsymbol{g}$, refusing to
 estimate it is a virtue.
 
-The takeaway: a deployed Joint-CS pipeline should gate on a conditioning
+The takeaway: a deployed our pipeline should gate on a conditioning
 check ($\kappa(\boldsymbol{B}^\top\boldsymbol{B})$ below a threshold) and
 fall back to sequential when the scene is too uniform.
+
+## Experiment 5 — Noise robustness sweep
+
+Fixes $\delta = 0.4$ ($M=102$, $N=256$, single 16×16 patch per scene)
+and sweeps measurement SNR over $\{5, 10, 15, 20, 25, 35\}$ dB. The
+Lasso parameter $\lambda$ scales with the noise level. All three
+solvers share precomputed Lipschitz constants and Cholesky factors so
+the comparison isolates noise effects.
+
+- Figure: `figures/noise_robustness.png`
+- Data:   `results/noise_robustness.json`
+
+**Findings.** PSNR (dB, mean ± std across 5 scenes):
+
+| SNR (dB) | $\lambda$ | OMP | FISTA | ADMM |
+| :---: | :---: | :---: | :---: | :---: |
+| 5  | 0.200 | 8.37 ± 0.76  | **10.39 ± 0.94** | 10.39 ± 0.94 |
+| 10 | 0.100 | 12.02 ± 1.21 | **14.08 ± 1.34** | 14.03 ± 1.37 |
+| 15 | 0.050 | 14.16 ± 1.47 | **15.59 ± 1.64** | 15.40 ± 1.62 |
+| 20 | 0.030 | 15.69 ± 1.01 | **16.57 ± 1.60** | 16.17 ± 1.75 |
+| 25 | 0.020 | 15.85 ± 1.94 | **17.21 ± 1.63** | 16.08 ± 1.96 |
+| 35 | 0.008 | 16.60 ± 1.39 | **17.35 ± 2.12** | 12.95 ± 1.69 |
+
+PSNR scales roughly linearly in SNR (dB) up to ~20 dB then **plateaus
+at ~17 dB** regardless of additional headroom — basis mismatch (the
+fixed 2D-DCT) is the bottleneck above 20 dB, not measurement noise.
+FISTA dominates throughout. ADMM tracks FISTA up to 25 dB but
+**degrades sharply at 35 dB** (12.95 vs 17.35); the small $\lambda$
+with fixed $\rho = 1.0$ leaves the splitting badly tuned. OMP trails
+FISTA by 1–2 dB at every SNR.
+
+## Experiment 6 — Identifiability gate: $\kappa(B^\top B)$ does not predict joint failure
+
+For each scene we record $\log_{10} \kappa(B^\top B)$ after the first
+c-step of the joint pipeline, then sweep a gate threshold $\tau$:
+gated = joint if $\log_{10}\kappa < \tau$ else sequential.
+Setup: $\delta = 0.4$, SNR = 25 dB, 8× horizontal gradient.
+
+- Figure: `figures/identifiability_gate.png`
+- Data:   `results/identifiability_gate.json`
+
+**Findings — the hypothesis is falsified.**
+
+| scene     | $\log_{10}\kappa$ | PSNR seq | PSNR joint | Δ (joint − seq) |
+| :-------- | :---: | :---: | :---: | :---: |
+| cameraman | 1.36  | 6.10  | **10.65** | +4.54 |
+| coins     | 1.37  | 6.35  | **10.14** | +3.78 |
+| astronaut | 1.86  | 13.15 | **13.31** | +0.16 |
+| page      | 1.79  | **12.07** | 10.28 | −1.79 |
+| moon      | **1.11** | **16.49** | 8.22 | **−8.27** |
+
+**Moon — the worst-performing scene for the joint pipeline — has the
+*lowest* $\log_{10}\kappa$ of the five.** The best gate threshold
+($\tau^\star = 1.37$) gives 10.85 dB mean PSNR vs 10.83 dB for
+sequential-only — essentially zero net advantage, because it routes
+moon to joint (wrong) and page away from joint (also wrong). The
+mechanism behind the moon failure is therefore **not** $B^\top B$
+ill-conditioning; it is **scene-energy deficiency**: the c-step on a
+near-uniformly-dark patch produces a near-zero $\hat{s}$, the rows of
+$B$ are small in absolute terms, and noise dominates the g-update. The
+correct gate signal is $\|\hat{s}\|_2$, not $\kappa$.
 
 ## Summary
 
@@ -184,16 +245,29 @@ fall back to sequential when the scene is too uniform.
 - **Joint vs sequential (Exp. 4).** Scene-dependent. Joint wins on
   textured scenes by up to +4.7 dB (cameraman, astronaut), is a wash on
   moderate-content scenes (coins, page), and fails catastrophically on
-  the near-uniform `moon` scene (−7.8 to −10.0 dB) because of
-  $\boldsymbol{g}$-update rank-deficiency. Excluding moon, joint wins
-  by +0.4 to +1.5 dB at every $\delta$. This is the project's headline
-  result — and its most informative limitation.
+  the near-uniform `moon` scene (−7.8 to −10.0 dB). Excluding moon,
+  joint wins by +0.4 to +1.5 dB at every $\delta$.
+- **Noise robustness (Exp. 5).** PSNR scales ~linearly in SNR (dB) up
+  to ~20 dB then plateaus at ~17 dB — basis mismatch dominates above
+  that. ADMM with fixed $\rho = 1.0$ destabilizes at SNR ≥ 35 dB.
+- **Identifiability gate (Exp. 6).** Falsifies the $\kappa(B^\top B)$
+  gate hypothesis from the original conclusion: moon has the lowest
+  $\kappa$ but the worst joint result. The real failure mechanism is
+  scene-energy deficiency in the first c-step; the correct gate signal
+  is $\|\hat{s}\|_2$, not $\kappa$.
 
 ## How to reproduce
 
 ```bash
+# Cap BLAS threads — small-matrix dispatch overhead otherwise
+# dominates on multi-core machines.
+export OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 \
+       VECLIB_MAXIMUM_THREADS=2
+
 python3 experiments/phase_transition.py     # ~8 min on CPU
 python3 experiments/rate_distortion.py      # ~12 s
 python3 experiments/train_lista.py          # ~4 min
 python3 experiments/joint_vs_sequential.py  # ~5 s
+python3 experiments/noise_robustness.py     # ~1 s
+python3 experiments/identifiability_gate.py # ~1 s
 ```
