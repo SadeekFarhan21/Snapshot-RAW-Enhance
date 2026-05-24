@@ -8,7 +8,7 @@
   <meta name="description" content="A single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned-ISTA c-step.">
   <meta property="og:title" content="Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery">
   <meta property="og:description" content="ENGS 109 final project, Dartmouth College. Six experiments, including a falsification of the proposed identifiability gate.">
-  <meta property="og:image" content="figures/rate_distortion.png">
+  <meta property="og:image" content="https://raw.githubusercontent.com/SadeekFarhan21/Snapshot-RAW-Enhance/main/site/public/figures/rate_distortion.png">
   <link rel="icon" type="image/svg+xml" href="https://www.farhansadeek.com/favicon.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://distill.pub/template.v2.js"></script>
@@ -139,13 +139,7 @@
           "authorURL": "mailto:farhan.sadeek.29@dartmouth.edu",
           "affiliations": [{"name": "Dartmouth College"}]
         }
-      ],
-      "katex": {
-        "delimiters": [
-          {"left": "$$", "right": "$$", "display": true},
-          {"left": "$", "right": "$", "display": false}
-        ]
-      }
+      ]
     }</script>
   </d-front-matter>
 
@@ -172,13 +166,13 @@
         <li class="toc-h2"><a href="#intro">Introduction</a></li>
         <li class="toc-h2"><a href="#related">Related work</a></li>
         <li class="toc-h2"><a href="#prelim">Mathematical preliminaries</a></li>
-        <li class="toc-h3"><a href="#prelim">Measurement model</a></li>
-        <li class="toc-h3"><a href="#prelim">Sparsity, convex relaxation</a></li>
-        <li class="toc-h3"><a href="#prelim">Classical solvers</a></li>
+        <li class="toc-h3"><a href="#measurement">Measurement model</a></li>
+        <li class="toc-h3"><a href="#sparsity">Sparsity, convex relaxation</a></li>
+        <li class="toc-h3"><a href="#solvers">Classical solvers</a></li>
         <li class="toc-h2"><a href="#method">Proposed method</a></li>
-        <li class="toc-h3"><a href="#method">Image formation</a></li>
-        <li class="toc-h3"><a href="#method">Joint objective</a></li>
-        <li class="toc-h3"><a href="#method">Deep-unfolded inner solver</a></li>
+        <li class="toc-h3"><a href="#formation">Image formation</a></li>
+        <li class="toc-h3"><a href="#objective">Joint objective</a></li>
+        <li class="toc-h3"><a href="#unfolding">Deep-unfolded inner solver</a></li>
         <li class="toc-h2"><a href="#experiments">Experiments</a></li>
         <li class="toc-h3"><a href="#phase">Phase transition</a></li>
         <li class="toc-h3"><a href="#rd">Rate&ndash;distortion</a></li>
@@ -186,7 +180,7 @@
         <li class="toc-h3"><a href="#joint-vs-seq">Joint vs sequential</a></li>
         <li class="toc-h3"><a href="#noise">Noise robustness</a></li>
         <li class="toc-h3"><a href="#gate">Identifiability gate (falsification)</a></li>
-        <li class="toc-h2"><a href="#conclusion">Conclusion</a></li>
+        <li class="toc-h2"><a href="#conclusion">Conclusion and future work</a></li>
       </ul>
     </nav>
 
@@ -227,7 +221,7 @@
 
     <h2 id="prelim">Mathematical preliminaries</h2>
 
-    <h3>3.1&nbsp;Measurement model</h3>
+    <h3 id="measurement">Measurement model</h3>
 
     <p>The CS forward model treats image acquisition as a linear measurement:</p>
 
@@ -235,7 +229,7 @@
 
     <p>with <d-math>M \ll N</d-math>. The sensing matrix <d-math>A</d-math> models the physical encoder (a coded-aperture mask, a random projection circuit, or in this work a column-normalized i.i.d.&nbsp;Gaussian ensemble), and <d-math>w</d-math> collects shot, read, and quantization noise.</p>
 
-    <h3>3.2&nbsp;Sparsity prior and convex relaxation</h3>
+    <h3 id="sparsity">Sparsity prior and convex relaxation</h3>
 
     <p>The unknown signal is <d-math>S</d-math>-sparse in some basis <d-math>\Psi</d-math>, i.e. <d-math>x = \Psi c</d-math> with <d-math>c \in \Sigma_S \equiv \{c \in \mathbb{R}^N \mid \|c\|_0 \le S\}</d-math>. Direct minimization of the <d-math>\ell_0</d-math> count is combinatorial. Under the RIP with constant <d-math>\delta_{2S} &lt; \sqrt{2}-1</d-math>, the convex relaxation</p>
 
@@ -243,7 +237,7 @@
 
     <p>recovers <d-math>c</d-math> to within <d-math>O(\epsilon)</d-math><d-cite key="candes2006stable"></d-cite>. Equivalently, the Lasso form <d-math>c_\lambda = \arg\min_c \tfrac{1}{2}\|A\Psi c - y\|_2^2 + \lambda \|c\|_1</d-math> is solved efficiently with proximal-gradient methods.</p>
 
-    <h3>3.3&nbsp;Classical solvers</h3>
+    <h3 id="solvers">Classical solvers</h3>
 
     <p><em>OMP</em><d-cite key="tropp2007signal"></d-cite> iteratively selects the column of <d-math>A\Psi</d-math> most correlated with the current residual and re-fits the active support by least squares. It can recover supports up to <d-math>S \lesssim M / \log N</d-math>.</p>
 
@@ -257,11 +251,11 @@
 
     <h2 id="method">Proposed method</h2>
 
-    <h3>4.1&nbsp;Image-formation model with illumination</h3>
+    <h3 id="formation">Image-formation model with illumination</h3>
 
     <p>We assume the RAW signal follows <d-math>x = s \odot g</d-math>. The conventional pipeline first recovers <d-math>x</d-math>, then divides out <d-math>g</d-math>. The ordering wastes the prior that <d-math>s</d-math> is sparse in <d-math>\Psi</d-math> but <d-math>x</d-math> is not: pointwise multiplication by an illumination field destroys DCT-domain sparsity, the <d-math>\ell_1</d-math> regularizer over-shrinks the coefficients corresponding to high-illumination columns, and the post-hoc correction can only rescale (not restore) what was lost.</p>
 
-    <h3>4.2&nbsp;Joint objective</h3>
+    <h3 id="objective">Joint objective</h3>
 
     <p>We instead minimize a single objective in <d-math>(c, g)</d-math>:</p>
 
@@ -276,7 +270,7 @@
 
     <p><em>Gain ambiguity.</em> The model has a scalar ambiguity: for any <d-math>a &gt; 0</d-math>, the pairs <d-math>(s, g)</d-math> and <d-math>(a s,\, g/a)</d-math> produce identical measurements. We resolve it at evaluation time by computing the optimal positive gain <d-math>a^\star = \langle \hat{s}, s_\text{true}\rangle / \|\hat{s}\|^2</d-math> and apply the same rule to the sequential baseline.</p>
 
-    <h3>4.3&nbsp;Deep-unfolded inner solver (LISTA)</h3>
+    <h3 id="unfolding">Deep-unfolded inner solver (LISTA)</h3>
 
     <p>A practical limitation of ISTA/FISTA is the iteration count &mdash; hundreds at deployment. We replace the <d-math>c</d-math>-step with <d-math>K</d-math> unrolled ISTA layers whose encoder, recurrent, and threshold parameters are <em>learned</em><d-cite key="gregor2010lista"></d-cite>:</p>
 
@@ -290,7 +284,7 @@
 
     <p>All experiments use Python&nbsp;3, NumPy, SciPy, scikit-image, and PyTorch (CPU). RNGs are seeded. The sensing matrix is column-normalized i.i.d.&nbsp;Gaussian unless stated otherwise. <em>Note: on multi-core machines, set <code>OPENBLAS_NUM_THREADS=2</code> to avoid small-matrix thread-contention slowdowns.</em></p>
 
-    <h3 id="phase">5.1&nbsp;Phase transition</h3>
+    <h3 id="phase">Phase transition</h3>
 
     <p>We fix <d-math>N = 200</d-math> and sweep <d-math>\delta = M/N</d-math> and <d-math>\rho = S/M</d-math> over a <d-math>19 \times 19</d-math> grid, <d-math>20</d-math> trials per cell, zero noise. A trial succeeds if NMSE <d-math>&lt; 10^{-3}</d-math>. Both solvers exhibit a sharp empirical Donoho&ndash;Tanner transition. OMP wins at small <d-math>\delta</d-math> (extreme undersampling); FISTA overtakes OMP as <d-math>\delta</d-math> grows. Crossover near <d-math>\delta \approx 0.65</d-math>.</p>
 
@@ -307,7 +301,7 @@
       </tbody>
     </table>
 
-    <h3 id="rd">5.2&nbsp;Rate-distortion on a 5-image natural-scene set</h3>
+    <h3 id="rd">Rate-distortion on a 5-image natural-scene set</h3>
 
     <p>Test set from <code>scikit-image</code>: <em>cameraman, astronaut, coins, page, moon</em>. Each image: grayscale, <d-math>64 \times 64</d-math>, <d-math>[0, 1]</d-math>, <d-math>16 \times 16</d-math> blocks, 2D-DCT basis, Gaussian sensing, SNR<d-math>{=}30</d-math>&nbsp;dB. PSNR mean &plusmn; std across the 5-image set:</p>
 
@@ -328,7 +322,7 @@
       <figcaption><em>Figure 2.</em> PSNR (left) and SSIM (right) vs measurement rate <d-math>\delta</d-math>, mean &plusmn; std across 5 scenes.</figcaption>
     </figure>
 
-    <h3 id="lista">5.3&nbsp;LISTA vs.&nbsp;classical solvers at matched compute</h3>
+    <h3 id="lista">LISTA vs.&nbsp;classical solvers at matched compute</h3>
 
     <p>Train <d-math>K = 10</d-math>-layer LISTA (tied <d-math>W_e, W_t</d-math>, per-layer learned <d-math>\theta_k</d-math>) on <d-math>5000</d-math> synthetic <d-math>(y, c)</d-math> pairs at <d-math>N{=}200, M{=}80, S{=}10</d-math>, SNR<d-math>{=}30</d-math>&nbsp;dB. Compare against ISTA/FISTA at exactly <d-math>K = 10</d-math> iterations.</p>
 
@@ -350,7 +344,7 @@
       <figcaption><em>Figure 3.</em> Left: LISTA training curve. Right: validation NMSE vs iteration count for ISTA/FISTA, with LISTA's <d-math>K{=}10</d-math> NMSE as the horizontal dashed line.</figcaption>
     </figure>
 
-    <h3 id="joint-vs-seq">5.4&nbsp;Joint vs.&nbsp;sequential under an 8&times; illumination gradient</h3>
+    <h3 id="joint-vs-seq">Joint vs.&nbsp;sequential under an 8&times; illumination gradient</h3>
 
     <p>For each scene we extract a <d-math>16 \times 16</d-math> center patch, <d-math>[0,1]</d-math>-normalize, multiply by a horizontal gradient <d-math>g_j = 1 + 7(j/15)</d-math> (factor-of-8 swing), Gaussian CS at SNR<d-math>{=}25</d-math>&nbsp;dB, and recover via two pipelines:</p>
 
@@ -384,7 +378,7 @@
       <figcaption><em>Figure 5.</em> Qualitative reconstructions on cameraman. Top: ground truth. Middle: sequential. Bottom: proposed. Sequential shows wash-out on the bright side and crush on the dark side; joint preserves both.</figcaption>
     </figure>
 
-    <h3 id="noise">5.5&nbsp;Noise robustness sweep</h3>
+    <h3 id="noise">Noise robustness sweep</h3>
 
     <p>Fix <d-math>\delta = 0.4</d-math> (<d-math>M = 102</d-math>, <d-math>N = 256</d-math>, single <d-math>16 \times 16</d-math> center patch per scene). Sweep measurement SNR across <d-math>\{5, 10, 15, 20, 25, 35\}</d-math>&nbsp;dB. <d-math>\lambda</d-math> scales with the noise level.</p>
 
@@ -405,7 +399,7 @@
       <figcaption><em>Figure 6.</em> Reconstruction PSNR vs measurement SNR at <d-math>\delta = 0.4</d-math>, mean &plusmn; std across 5 scenes. Plateau above 20&nbsp;dB signals basis mismatch is the bottleneck; ADMM's drop at 35&nbsp;dB is a <d-math>\rho</d-math>-tuning failure.</figcaption>
     </figure>
 
-    <h3 id="gate">5.6&nbsp;Identifiability gate: <d-math>\kappa(B^\top B)</d-math> does <em>not</em> predict joint failure</h3>
+    <h3 id="gate">Identifiability gate: <d-math>\kappa(B^\top B)</d-math> does <em>not</em> predict joint failure</h3>
 
     <p>The catastrophic moon result of <a href="#joint-vs-seq">the joint-vs-sequential ablation</a> prompted the hypothesis that the joint pipeline fails when the column-gain Gram matrix <d-math>B^\top B</d-math> is ill-conditioned, suggesting a deployable gate based on <d-math>\kappa(B^\top B)</d-math>. <em>We test that hypothesis directly. It is empirically falsified.</em></p>
 
