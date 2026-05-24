@@ -21,8 +21,8 @@ import style from '../styles/d-math.css';
 // attaches renderMathInElement to window
 import { renderMathInElement } from '../helpers/katex-auto-render';
 
-export const katexJSURL = 'https://distill.pub/third-party/katex/katex.min.js';
-export const katexCSSTag = '<link rel="stylesheet" href="https://distill.pub/third-party/katex/katex.min.css" crossorigin="anonymous">';
+export const katexJSURL = 'vendor/katex/katex.min.js';
+export const katexCSSTag = '<link rel="stylesheet" href="vendor/katex/katex.min.css">';
 
 const T = Template('d-math', `
 ${katexCSSTag}
@@ -98,15 +98,30 @@ export class DMath extends Mutating(T(HTMLElement)) {
 
   connectedCallback() {
     super.connectedCallback();
+    const container = this.root.querySelector('#katex-container');
+    if (container && !container.textContent) {
+      container.textContent = this.textContent;
+    }
     if (!DMath.katexAdded) {
       DMath.addKatex();
     }
   }
 
   renderContent() {
-    if (typeof katex !== 'undefined') {
-      const container = this.root.querySelector('#katex-container');
-      katex.render(this.textContent, container, this.options);
+    const container = this.root.querySelector('#katex-container');
+    if (typeof katex !== 'undefined' && container) {
+      try {
+        container.textContent = '';
+        container.removeAttribute('data-fallback');
+        katex.render(this.textContent, container, this.options);
+      } catch (error) {
+        console.warn('Could not render math:', this.textContent, error);
+        container.textContent = this.textContent;
+        container.setAttribute('data-fallback', 'true');
+      }
+    } else if (container) {
+      container.textContent = this.textContent;
+      container.setAttribute('data-fallback', 'true');
     }
   }
 

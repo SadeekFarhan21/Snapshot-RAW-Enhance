@@ -8,10 +8,59 @@
   <meta name="description" content="A single inverse problem in DCT-domain reflectance coefficients and a smooth per-column illumination field, solved by block-coordinate alternation with a learned-ISTA c-step.">
   <meta property="og:title" content="Simultaneous Illumination Normalization and Sparse Image Compression via Unfolded Recovery">
   <meta property="og:description" content="ENGS 109 final project, Dartmouth College. Six experiments, including a falsification of the proposed identifiability gate.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/SadeekFarhan21/Snapshot-RAW-Enhance/main/site/public/figures/rate_distortion.png">
-  <link rel="icon" type="image/svg+xml" href="https://www.farhansadeek.com/favicon.svg">
+  <meta property="og:image" content="figures/rate_distortion.png">
+  <link rel="icon" href="https://distill.pub/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <script src="https://distill.pub/template.v2.js"></script>
+  <script>
+    window.renderDistillMathWithMathJax = function() {
+      const mathTags = document.querySelectorAll("d-title d-math, d-article d-math, d-appendix d-math");
+      for (const mathTag of mathTags) {
+        const tex = mathTag.textContent.trim();
+        const isBlock = mathTag.hasAttribute("block");
+        const replacement = document.createElement(isBlock ? "div" : "span");
+        replacement.className = isBlock ? "mathjax-block mathjax-pending" : "mathjax-inline mathjax-pending";
+        replacement.textContent = isBlock ? "\\[" + tex + "\\]" : "\\(" + tex + "\\)";
+        mathTag.replaceWith(replacement);
+      }
+
+      if (!window.MathJax || !window.MathJax.typesetPromise) {
+        return;
+      }
+
+      const pendingNodes = Array.from(document.querySelectorAll(".mathjax-pending"));
+      if (pendingNodes.length === 0) {
+        return;
+      }
+
+      window.MathJax.typesetPromise(pendingNodes).then(() => {
+        for (const node of pendingNodes) {
+          node.classList.remove("mathjax-pending");
+        }
+      }).catch((error) => {
+        console.warn("MathJax typesetting failed", error);
+      });
+    };
+
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"], ["$", "$"]],
+        displayMath: [["\\[", "\\]"], ["$$", "$$"]]
+      },
+      startup: {
+        pageReady: () => {
+          const ready = window.MathJax.startup.defaultPageReady();
+          window.renderDistillMathWithMathJax();
+          return ready;
+        }
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      window.renderDistillMathWithMathJax();
+    }, { once: true });
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="template.v2.js"></script>
   <style>
     /* Light tweaks on top of the Distill base styles. */
     d-article table {
@@ -55,6 +104,24 @@
       padding: 0.05em 0.3em;
       border-radius: 3px;
       font-size: 0.92em;
+    }
+    .mathjax-inline {
+      display: inline;
+      white-space: nowrap;
+      margin: 0 0.08em;
+    }
+    .mathjax-block {
+      display: block;
+      margin: 0.5em 0;
+      overflow-x: auto;
+    }
+    mjx-container[jax="CHTML"] {
+      margin: 0 0.08em;
+    }
+    mjx-container[jax="CHTML"][display="true"] {
+      margin: 0.75rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
     /* Paper-links button bar (icon buttons under the abstract). */
     d-title .button-container {
@@ -139,7 +206,13 @@
           "authorURL": "mailto:farhan.sadeek.29@dartmouth.edu",
           "affiliations": [{"name": "Dartmouth College"}]
         }
-      ]
+      ],
+      "katex": {
+        "delimiters": [
+          {"left": "$$", "right": "$$", "display": true},
+          {"left": "$", "right": "$", "display": false}
+        ]
+      }
     }</script>
   </d-front-matter>
 
@@ -455,7 +528,94 @@
     <h3>Acknowledgements</h3>
     <p>This work was carried out as a final project for ENGS&nbsp;109 (High-dimensional Sensing and Learning) at Dartmouth College.</p>
 
-    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <d-footnote-list></d-footnote-list>
+    <d-citation-list></d-citation-list>
+    <d-bibliography>
+      <script type="text/bibtex">
+@article{beck2009fast,
+  title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
+  author={Beck, Amir and Teboulle, Marc},
+  journal={SIAM Journal on Imaging Sciences},
+  volume={2},
+  number={1},
+  pages={183--202},
+  year={2009}
+}
+
+@article{boyd2011distributed,
+  title={Distributed optimization and statistical learning via the alternating direction method of multipliers},
+  author={Boyd, Stephen and Parikh, Neal and Chu, Eric and Peleato, Borja and Eckstein, Jonathan},
+  journal={Foundations and Trends in Machine Learning},
+  volume={3},
+  number={1},
+  pages={1--122},
+  year={2011}
+}
+
+@article{candes2006stable,
+  title={Stable signal recovery from incomplete and inaccurate measurements},
+  author={Cand{\`e}s, Emmanuel J. and Romberg, Justin K. and Tao, Terence},
+  journal={Communications on Pure and Applied Mathematics},
+  volume={59},
+  number={8},
+  pages={1207--1223},
+  year={2006}
+}
+
+@article{donoho2006compressed,
+  title={Compressed sensing},
+  author={Donoho, David L.},
+  journal={IEEE Transactions on Information Theory},
+  volume={52},
+  number={4},
+  pages={1289--1306},
+  year={2006}
+}
+
+@article{donoho2009observed,
+  title={Observed universality of phase transitions in high-dimensional geometry, with implications for modern data analysis and signal processing},
+  author={Donoho, David L. and Tanner, Jared},
+  journal={Philosophical Transactions of the Royal Society A},
+  volume={367},
+  number={1906},
+  pages={4273--4293},
+  year={2009}
+}
+
+@book{elad2010sparse,
+  title={Sparse and Redundant Representations: From Theory to Applications in Signal and Image Processing},
+  author={Elad, Michael},
+  year={2010},
+  publisher={Springer}
+}
+
+@book{foucart2013mathematical,
+  title={A Mathematical Introduction to Compressive Sensing},
+  author={Foucart, Simon and Rauhut, Holger},
+  series={Applied and Numerical Harmonic Analysis},
+  year={2013},
+  publisher={Birkh{\"a}user}
+}
+
+@inproceedings{gregor2010lista,
+  title={Learning fast approximations of sparse coding},
+  author={Gregor, Karol and LeCun, Yann},
+  booktitle={Proceedings of the 27th International Conference on Machine Learning},
+  pages={399--406},
+  year={2010}
+}
+
+@article{tropp2007signal,
+  title={Signal recovery from random measurements via orthogonal matching pursuit},
+  author={Tropp, Joel A. and Gilbert, Anna C.},
+  journal={IEEE Transactions on Information Theory},
+  volume={53},
+  number={12},
+  pages={4655--4666},
+  year={2007}
+}
+      </script>
+    </d-bibliography>
   </d-appendix>
 
 </body>
