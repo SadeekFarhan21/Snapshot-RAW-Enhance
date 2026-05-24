@@ -50,9 +50,6 @@
       color: rgba(0, 0, 0, 0.6);
       margin-top: 0.5rem;
     }
-    d-article .highlight {
-      color: #b3322c;
-    }
     d-article code {
       background: rgba(0, 0, 0, 0.04);
       padding: 0.05em 0.3em;
@@ -217,7 +214,7 @@
     <ol>
       <li>We formulate our framework: a joint $\ell_1$/smooth-prior objective in $(c, g)$ that performs sparse recovery and illumination correction in a single optimization, and we derive a block-coordinate solver with a FISTA inner loop on $c$ and a closed-form ridge step on $g$.</li>
       <li>We deep-unfold the $c$-step into a learned $K{=}10$-layer LISTA network<d-cite key="gregor2010lista"></d-cite> and stabilize its training under sustained Adam with gradient clipping and best-checkpoint restoration.</li>
-      <li>We benchmark the full system across <em>six</em> experiments. The headline result is the per-scene gain on textured natural images. <span class="highlight">The most informative <em>negative</em> result is that the $\kappa(B^\top B)$ gate one would naturally propose for the joint pipeline's failure mode is empirically <em>false</em>.</span></li>
+      <li>We benchmark the full system across <em>six</em> experiments. The headline result is the per-scene gain on textured natural images. The most informative <em>negative</em> result is that the $\kappa(B^\top B)$ gate one would naturally propose for the joint pipeline's failure mode is empirically <em>false</em>.</li>
     </ol>
 
     <h2 id="related">Related work</h2>
@@ -425,7 +422,7 @@
       </tbody>
     </table>
 
-    <p><span class="highlight"><strong>Moon &mdash; the worst-performing scene for the joint pipeline &mdash; has the <em>lowest</em> $\log_{10}\kappa$.</strong></span> The best $\kappa$-gate found by sweep ($\tau^\star = 1.37$) recovers only 0.02&nbsp;dB on average over sequential-only, because it correctly routes <em>cameraman</em> and <em>coins</em> to joint but still routes <em>moon</em> to joint and misroutes <em>page</em> away from sequential.</p>
+    <p><strong>Moon &mdash; the worst-performing scene for the joint pipeline &mdash; has the <em>lowest</em> $\log_{10}\kappa$.</strong> The best $\kappa$-gate found by sweep ($\tau^\star = 1.37$) recovers only 0.02&nbsp;dB on average over sequential-only, because it correctly routes <em>cameraman</em> and <em>coins</em> to joint but still routes <em>moon</em> to joint and misroutes <em>page</em> away from sequential.</p>
 
     <p>The mechanism behind the moon failure is therefore not Gram-matrix rank-deficiency: it is <strong>scene-energy deficiency</strong>. The $c$-step on a near-uniformly-dark patch produces a near-zero scene estimate; the rows of $B$ are correspondingly small in absolute terms even if their conditioning is fine; any noise then dominates the $g$-update. A correct gate would key on the <em>magnitude</em> of $\hat{s}$ (e.g., $\|\hat{s}\|_2$ or its total variance) rather than $\kappa$. We mark this as a corrected, sharper version of the open problem.</p>
 
