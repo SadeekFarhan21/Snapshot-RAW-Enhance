@@ -11,7 +11,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 % 48 in x 36 in  ==  121.92 cm x 91.44 cm  (landscape)
-\usepackage[size=custom,width=121.92,height=91.44,scale=1.05]{beamerposter}
+\usepackage[size=custom,width=121.92,height=91.44,scale=1.04]{beamerposter}
 \usetheme{thayer}
 \usecolortheme{thayer}
 \usepackage{graphicx}
@@ -25,6 +25,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{bm}
 
 % Shrink the headline title so it fits on a SINGLE line without
 % colliding with the Dartmouth Engineering logo at the top-right
@@ -39,8 +40,13 @@
 
 \newlength{\sepwidth}
 \newlength{\colwidth}
-\setlength{\sepwidth}{0.022\paperwidth}
-\setlength{\colwidth}{0.225\paperwidth}
+\setlength{\sepwidth}{0.020\paperwidth}
+\setlength{\colwidth}{0.305\paperwidth}
+
+% Bump up titles for the 3-column layout while keeping body readable.
+\setbeamerfont{block title}{family=\Raleway,size=\LARGE,series=\bfseries}
+\setbeamerfont{heading}{family=\Lato,size=\large,series=\bfseries}
+\setbeamerfont{caption}{size=\normalsize}
 
 \newcommand{\separatorcolumn}{
   \begin{column}{\sepwidth}
@@ -90,17 +96,14 @@
         \citep{candes2006stable,donoho2006compressed}.
 
         \medskip
-        \textbf{The sequential pipeline wastes its prior:}
-      \begin{enumerate}\setlength{\itemsep}{0.15em}
-          \item RAW sensors measure $\boldsymbol{x}=\boldsymbol{s}\odot\boldsymbol{g}$, the
-            \emph{product} of sparse reflectance and a smooth
-            illumination field.
-          \item CS-then-correct enforces $\ell_1$ on $\boldsymbol{x}$, but
-            $\boldsymbol{x}$ is \emph{not} DCT-sparse; multiplication by
-            $\boldsymbol{g}$ destroys the sparsity the regularizer relies on.
-          \item Post-hoc column-mean correction can rescale but
-            cannot restore information already shrunken away.
-        \end{enumerate}
+        \textbf{The sequential pipeline wastes its prior.}
+        RAW sensors measure $\boldsymbol{x}=\boldsymbol{s}\odot\boldsymbol{g}$,
+        the \emph{product} of sparse reflectance and a smooth
+        illumination field. CS-then-correct enforces $\ell_1$ on
+        $\boldsymbol{x}$, but $\boldsymbol{x}$ is \emph{not} DCT-sparse;
+        multiplication by $\boldsymbol{g}$ destroys the sparsity the
+        regularizer relies on. Post-hoc column-mean correction can
+        rescale but cannot restore information already shrunken away.
 
       \end{block}
 
@@ -108,20 +111,24 @@
 
       \begin{alertblock}{Our Contributions}
 
-      \begin{enumerate}\setlength{\itemsep}{0.2em}
-          \item \textbf{our framework objective.} A single $\ell_1{+}$smooth-prior
-            problem in $(\boldsymbol{c},\boldsymbol{g})$ solved by block-coordinate
-            alternation: FISTA on $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
-          \item \textbf{Deep-unfolded inner solver.} A $K{=}10$-layer
-            LISTA \citep{gregor2010lista} with Adam, gradient clipping
-            and best-checkpoint restore for stability.
-          \item \textbf{Scene-dependent benchmark.} Phase transition,
-            multi-image rate-distortion, LISTA-vs-classical, and
-            per-scene illumination ablation on $5$ natural images.
-          \item \textbf{Honest failure-mode analysis.} Joint catastrophically
-            fails on near-uniform scenes (moon, $-8$\,dB); we trace
-            it to rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$.
-        \end{enumerate}
+        \textbf{Joint recovery objective.} A single $\ell_1{+}$smooth-prior
+        problem in $(\boldsymbol{c},\boldsymbol{g})$ solved by block-coordinate
+        alternation: FISTA on $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
+
+        \medskip
+        \textbf{Deep-unfolded inner solver.} A $K{=}10$-layer
+        LISTA \citep{gregor2010lista} with Adam, gradient clipping
+        and best-checkpoint restore for stability.
+
+        \medskip
+        \textbf{Scene-dependent benchmark.} Phase transition, multi-image
+        rate-distortion, LISTA-vs-classical, and per-scene illumination
+        ablation on $5$ natural images.
+
+        \medskip
+        \textbf{Honest failure-mode analysis.} Joint catastrophically
+        fails on near-uniform scenes (moon, $-8$\,dB); we trace it to
+        rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$.
 
       \end{alertblock}
 
@@ -132,17 +139,16 @@
         \large
         \textbf{Estimating reflectance and illumination
           \emph{jointly} beats the conventional CS-then-correct
-        pipeline by up to $+4.7$\,dB on textured scenes ---
-        \emph{when} the scene has enough column-wise energy to
+          pipeline by up to $+4.7$\,dB on textured scenes ---
+          \emph{when} the scene has enough column-wise energy to
         identify the gain.}
 
         \medskip\normalsize
-      \begin{itemize}\setlength{\itemsep}{0.15em}
-          \item \textbf{Textured wins:} $+1.1$ to $+4.7$\,dB (cameraman, astronaut).
-          \item \textbf{LISTA speedup:} $K{=}10$ matches FISTA at $22$ iters.
-          \item \textbf{Failure mode:} $-8$\,dB on near-uniform (moon)
-            -- needs an identifiability gate.
-        \end{itemize}
+        \textbf{Textured wins} of $+1.1$ to $+4.7$\,dB on cameraman
+        and astronaut; \textbf{LISTA speedup} where $K{=}10$ layers
+        match FISTA at $22$ iterations; \textbf{failure mode} of
+        $-8$\,dB on near-uniform moon -- exposing the need for an
+        identifiability gate.
 
       \end{exampleblock}
 
@@ -150,38 +156,37 @@
 
       \begin{block}{Background: Compressed Sensing}
 
-        With $\boldsymbol{x}{=}\boldsymbol{\Psi}\boldsymbol{c}$ and $\|\boldsymbol{c}\|_0\!\leq\!S$, the
+        With $\boldsymbol{x}{=}\bm{\Psi}\boldsymbol{c}$ and $\|\boldsymbol{c}\|_0\!\leq\!S$, the
         forward model is
         $\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$, $\boldsymbol{A}{\in}\mathbb R^{M{\times}N}$.
         If $\boldsymbol{A}$ satisfies the RIP with
         $\delta_{2S}\!<\!\sqrt 2{-}1$, the Lasso relaxation
         \[
           \boldsymbol{c}_\lambda
-          =\arg\min_{\boldsymbol{c}}\;\tfrac12\|\boldsymbol{A}\boldsymbol{\Psi}\boldsymbol{c}-\boldsymbol{y}\|_2^2
+          =\arg\min_{\boldsymbol{c}}\;\tfrac12\|\boldsymbol{A}\bm{\Psi}\boldsymbol{c}-\boldsymbol{y}\|_2^2
           +\lambda\|\boldsymbol{c}\|_1
         \]
         recovers $\boldsymbol{c}$ to within $O(\epsilon)$
-        \citep{candes2006stable}. We use the 2D DCT as $\boldsymbol{\Psi}$, a
+        \citep{candes2006stable}. We use the 2D DCT as $\bm{\Psi}$, a
         strong natural-image sparsifying basis.
 
       \end{block}
 
       \medskip
 
-      \begin{block}{The Sequential-Pipeline Problem}
+      \begin{block}{Block-Coordinate Recipe}
 
-        A conventional pipeline recovers $\boldsymbol{x}$ first, then divides
-        out an illumination estimate. Two errors compound:
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item \textbf{Sparsity broken at the prior.} Pointwise
-            multiplication by $\boldsymbol{g}$ kills DCT-domain sparsity, so
-            $\ell_1$ over-shrinks high-illumination coefficients.
-          \item \textbf{Correction is shape-rigid.} A column-mean
-            divisor copies the gradient but cannot restore the
-            information the over-shrinkage has already destroyed.
-        \end{itemize}
-        our framework estimates $\boldsymbol{c}$ and $\boldsymbol{g}$ together so the
-        $\ell_1$ prior sees the true sparse signal $\boldsymbol{s}$.
+        Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$ and
+        $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$. The
+        \textbf{$\boldsymbol{c}$-update} holds $\boldsymbol{g}^{(t)}$ fixed and runs
+        $T_c$ FISTA (or $K$ LISTA) steps on the effective sensing
+        matrix $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t)})$. The
+        \textbf{$\boldsymbol{g}$-update} then holds $\boldsymbol{c}^{(t{+}1)}$ fixed and
+        solves
+        $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
+        in closed form, clamping to $[\epsilon_g,\infty)$. We repeat
+        for $T_\textrm{outer}{=}8$ outer iterations and resolve the
+        scalar gain ambiguity at evaluation.
 
       \end{block}
 
@@ -194,43 +199,85 @@
     % ============================================================
     \begin{column}{\colwidth}
 
-      \begin{block}{Notation}
+      \begin{block}{Encoder $\to$ Decoder Pipeline}
 
-        \begin{tabular}{@{}l@{\hspace{0.9em}}l@{}}
-          $\boldsymbol{y}\!\in\!\mathbb R^M$  & CS measurements ($M{\ll}N$) \\
-          $\boldsymbol{A}\!\in\!\mathbb R^{M{\times}N}$ & Gaussian sensing matrix \\
-          $\boldsymbol{\Psi}$ & 2D DCT sparsifying basis \\
-          $\boldsymbol{c}$ & sparse DCT coefficients \\
-          $\boldsymbol{s}{=}\boldsymbol{\Psi}\boldsymbol{c}$ & sparse reflectance image \\
-          $\boldsymbol{g}\!\in\!\mathbb R^{\sqrt N}$ & per-column illumination gain \\
-          $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}_\textrm{pix}$ & RAW signal \\
-        \end{tabular}
+        \begin{figure}
+          \centering
+          \begin{tikzpicture}[
+              xscale=1.32,
+              every node/.style={font=\footnotesize},
+              raw/.style={rounded corners=2pt, draw=black!60, fill=blue!10,
+                draw=blue!55!black,
+                minimum width=2.8cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              meas/.style={rounded corners=2pt, draw=green!55!black, fill=green!10,
+                minimum width=2.8cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              joint/.style={rounded corners=4pt, draw=black!80, very thick,
+                fill=yellow!12, minimum width=2.8cm, minimum height=1.4cm,
+              font=\footnotesize\bfseries, align=center},
+              dec/.style={rounded corners=4pt, draw=red!70!black, very thick,
+                fill=red!8, minimum width=2.8cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
+            ]
+            \node[raw]   (s)   at (0, 1.2) {reflectance $\boldsymbol{s}$};
+            \node[raw]   (g)   at (0,-1.2) {illumination $\boldsymbol{g}$};
+            \node[meas]  (y)   at (3.4, 0.0) {$\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$};
+            \node[joint] (alt) at (7.4, 0.0) {block-coord\\$\boldsymbol{c}\!\leftrightarrow\!\boldsymbol{g}$};
+            \node[raw]   (sh)  at (11.0, 1.2) {$\hat{\boldsymbol{s}}{=}\bm{\Psi}\hat{\boldsymbol{c}}$};
+            \node[raw]   (gh)  at (11.0,-1.2) {$\hat{\boldsymbol{g}}$};
+            \node[dec]   (out) at (14.6, 0.0) {gain-match\\+ PSNR};
+
+            \draw[flowarr] (s.east) -- (y.west);
+            \draw[flowarr] (g.east) -- (y.west);
+            \draw[flowarr] (y) -- (alt);
+            \draw[flowarr] (alt.east) -- (sh.west);
+            \draw[flowarr] (alt.east) -- (gh.west);
+            \draw[flowarr] (sh) -- (out);
+            \draw[flowarr] (gh) -- (out);
+
+            \node[font=\scriptsize, anchor=north, text=black!65] at (0,-2.1)
+            {$\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (3.4,-2.1)
+            {Gaussian $\boldsymbol{A}$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (7.4,-2.1)
+            {LISTA / FISTA};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (13.5,-2.1)
+            {$a^\star\!=\!\langle\hat{\boldsymbol{s}},\boldsymbol{s}\rangle/\|\hat{\boldsymbol{s}}\|^2$};
+          \end{tikzpicture}
+          \caption{End-to-end joint recovery pipeline. The RAW signal
+            $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$ is measured via Gaussian
+            $\boldsymbol{A}$; block-coordinate alternation recovers
+            $(\boldsymbol{c},\boldsymbol{g})$ simultaneously; the scalar gain
+          ambiguity is resolved at evaluation.}
+        \end{figure}
 
       \end{block}
 
       \medskip
 
-      \begin{block}{Method 1: our framework Objective}
+      \begin{block}{Method 1: Joint Recovery Objective}
 
         \textbf{Replace} the two-stage pipeline with a single objective:
         \[
-          \boxed{\;
-            \min_{\boldsymbol{c},\boldsymbol{g}}\;
-            \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})
-            \boldsymbol{\Psi}\boldsymbol{c}-\boldsymbol{y}\big\|_2^2
-            +\lambda_c\|\boldsymbol{c}\|_1
-            +\lambda_g\|\nabla\boldsymbol{g}\|_2^2
-          \;}
+          \;
+          \min_{\boldsymbol{c},\boldsymbol{g}}\;
+          \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})
+          \bm{\Psi}\boldsymbol{c}-\boldsymbol{y}\big\|_2^2
+          +\lambda_c\|\boldsymbol{c}\|_1
+          +\lambda_g\|\nabla\boldsymbol{g}\|_2^2
+          \;
         \]
         Jointly non-convex but \textbf{block-convex} in each variable.
 
         \medskip
         \textbf{$\boldsymbol{c}$-step.} Fix $\boldsymbol{g}$; effective sensing matrix
-        $\boldsymbol{A}_{\!\textrm{eff}}{=}\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})\boldsymbol{\Psi}$,
+        $\boldsymbol{A}_{\!\textrm{eff}}{=}\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})\bm{\Psi}$,
         update is a standard Lasso solved by FISTA.
 
         \medskip
-        \textbf{$\boldsymbol{g}$-step.} Fix $\boldsymbol{c}$; with $\hat{\boldsymbol{s}}{=}\boldsymbol{\Psi}\boldsymbol{c}$
+        \textbf{$\boldsymbol{g}$-step.} Fix $\boldsymbol{c}$; with $\hat{\boldsymbol{s}}{=}\bm{\Psi}\boldsymbol{c}$
         the model is linear in $\boldsymbol{g}$,
         $\boldsymbol{y}{=}\boldsymbol{B}(\hat{\boldsymbol{s}})\boldsymbol{g}{+}\boldsymbol{w}$, and the
         update is closed-form ridge:
@@ -264,8 +311,8 @@
           \quad k=0,\dots,K{-}1.
         \]
         Initialise
-        $\boldsymbol{W}_e{=}\tfrac1L(\boldsymbol{A}\boldsymbol{\Psi})^{\!\top}$,
-        $\boldsymbol{W}_t{=}\boldsymbol{I}{-}\tfrac1L(\boldsymbol{A}\boldsymbol{\Psi})^{\!\top}\boldsymbol{A}\boldsymbol{\Psi}$,
+        $\boldsymbol{W}_e{=}\tfrac1L(\boldsymbol{A}\bm{\Psi})^{\!\top}$,
+        $\boldsymbol{W}_t{=}\boldsymbol{I}{-}\tfrac1L(\boldsymbol{A}\bm{\Psi})^{\!\top}\boldsymbol{A}\bm{\Psi}$,
         $\theta_k{=}\lambda/L$ to reproduce ISTA at step zero, then
         train end-to-end on $(\boldsymbol{y},\boldsymbol{c})$ pairs.
 
@@ -273,138 +320,55 @@
         \begin{figure}
           \centering
           \begin{tikzpicture}[
-              scale=1.0,
+              xscale=1.32,
               every node/.style={font=\footnotesize},
-              lstep/.style={rounded corners=3pt, draw=black!70, very thick,
-                fill=blue!10, minimum width=2.0cm, minimum height=0.9cm,
-              font=\small\bfseries, align=center},
-              thr/.style={rounded corners=3pt, draw=orange!75!black, very thick,
-                fill=orange!20, minimum width=1.5cm, minimum height=0.9cm,
-              font=\small\bfseries, align=center},
+              raw/.style={rounded corners=2pt, draw=blue!55!black, fill=blue!10,
+                minimum width=2.0cm, minimum height=0.8cm,
+              font=\footnotesize\bfseries, align=center},
+              layer/.style={rounded corners=4pt, draw=black!80, very thick,
+                fill=yellow!12, minimum width=2.8cm, minimum height=1.4cm,
+              font=\footnotesize\bfseries, align=center},
               flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
             ]
-            \node[lstep] (l1) at (0,0)  {LISTA\\layer 1};
-            \node[thr]   (s1) at (2.2,0) {$\mathcal S_{\theta_1}$};
-            \node[lstep] (l2) at (4.6,0) {LISTA\\layer 2};
-            \node[thr]   (s2) at (6.8,0) {$\mathcal S_{\theta_2}$};
-            \node          at (8.6,0)   {$\cdots$};
-            \node[lstep] (lk) at (10.6,0){LISTA\\layer $K$};
-            \node[thr]   (sk) at (12.8,0){$\mathcal S_{\theta_K}$};
+            \node[raw]   (y)  at (-1.0,0)  {$\boldsymbol{y}$};
+            \node[layer] (l1) at (2.0,0)  {LISTA\\layer 1};
+            \node[layer] (l2) at (5.4,0)  {LISTA\\layer 2};
+            \node                at (7.8,0)  {$\cdots$};
+            \node[layer] (lk) at (10.2,0) {LISTA\\layer $K$};
+            \node[raw]   (c)  at (13.2,0) {$\hat{\boldsymbol{c}}$};
 
-            \node[font=\small] (y) at (-2.0,0) {$\boldsymbol{y}$};
-            \node[font=\small] (c) at (14.8,0) {$\hat{\boldsymbol{c}}$};
+            \draw[flowarr] (y) -- (l1);
+            \draw[flowarr] (l1) -- (l2);
+            \draw[flowarr] (l2) -- (7.3,0);
+            \draw[flowarr] (8.3,0) -- (lk);
+            \draw[flowarr] (lk) -- (c);
 
-            \draw[flowarr] (y)--(l1);
-            \draw[flowarr] (l1)--(s1);
-            \draw[flowarr] (s1)--(l2);
-            \draw[flowarr] (l2)--(s2);
-            \draw[flowarr] (s2)--(8.0,0);
-            \draw[flowarr] (9.2,0)--(lk);
-            \draw[flowarr] (lk)--(sk);
-            \draw[flowarr] (sk)--(c);
-
-            \node[font=\scriptsize, text=black!65, anchor=north]
-              at (6.4,-0.9) {tied $\boldsymbol{W}_e,\boldsymbol{W}_t$; per-layer learnable $\theta_k$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (-1.0,-1.2)
+            {input};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (2.0,-1.2)
+            {$\mathcal S_{\theta_1}(\boldsymbol{W}_t\boldsymbol{c}^{(0)}{+}\boldsymbol{W}_e\boldsymbol{y})$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (5.4,-1.2)
+            {$\mathcal S_{\theta_2}(\boldsymbol{W}_t\boldsymbol{c}^{(1)}{+}\boldsymbol{W}_e\boldsymbol{y})$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (10.2,-1.2)
+            {$\mathcal S_{\theta_K}(\boldsymbol{W}_t\boldsymbol{c}^{(K{-}1)}{+}\boldsymbol{W}_e\boldsymbol{y})$};
+            \node[font=\scriptsize, anchor=north, text=black!65] at (13.2,-1.2)
+            {sparse code};
           \end{tikzpicture}
-          \caption{$K$-layer LISTA with tied weights and per-layer
-            thresholds. Each $\theta_k$ adapts to that layer's effective
-            noise; the recurrence reproduces ISTA at initialisation.}
+          \caption{$K$-layer LISTA with tied weights
+            $\boldsymbol{W}_e,\boldsymbol{W}_t$ and per-layer learnable
+            thresholds $\theta_k$. Each block is one ISTA-style update
+            followed by soft-thresholding; the recurrence reproduces
+          ISTA at initialisation.}
         \end{figure}
 
         \heading{Stability tricks}
 
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item Naive Adam@$5{\times}10^{-3}$: clean descent to
-            $0.12$ NMSE, then blow-up to $\sim\!10^3$.
-          \item Diagnosis: $\rho(\boldsymbol{W}_t){>}1$ along some
-            eigendirection causes the recurrence to diverge.
-          \item Fix: (i) lr$\to\!10^{-3}$, (ii) clip-norm $1.0$,
-            (iii) restore best-val checkpoint.
-        \end{itemize}
-
-      \end{block}
-
-    \end{column}
-
-    \separatorcolumn
-
-    % ============================================================
-    % COLUMN 3 -- Pipeline + Algorithm + Phase Transition
-    % ============================================================
-    \begin{column}{\colwidth}
-
-      \begin{block}{Encoder $\to$ Decoder Pipeline}
-
-        \begin{figure}
-          \centering
-          \begin{tikzpicture}[
-              xscale=1.18,
-              every node/.style={font=\footnotesize},
-              raw/.style={rounded corners=2pt, draw=black!60, fill=blue!10,
-                draw=blue!55!black,
-                minimum width=2.8cm, minimum height=0.8cm,
-              font=\footnotesize\bfseries, align=center},
-              meas/.style={rounded corners=2pt, draw=green!55!black, fill=green!10,
-                minimum width=2.8cm, minimum height=0.8cm,
-              font=\footnotesize\bfseries, align=center},
-              joint/.style={rounded corners=4pt, draw=black!80, very thick,
-                fill=yellow!12, minimum width=2.8cm, minimum height=1.4cm,
-              font=\footnotesize\bfseries, align=center},
-              dec/.style={rounded corners=4pt, draw=red!70!black, very thick,
-                fill=red!8, minimum width=2.8cm, minimum height=0.8cm,
-              font=\footnotesize\bfseries, align=center},
-              flowarr/.style={-{Stealth[length=2.5mm]}, thick, draw=black!65}
-            ]
-            \node[raw]   (s)   at (0, 1.2) {reflectance $\boldsymbol{s}$};
-            \node[raw]   (g)   at (0,-1.2) {illumination $\boldsymbol{g}$};
-            \node[meas]  (y)   at (3.4, 0.0) {$\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$};
-            \node[joint] (alt) at (7.4, 0.0) {block-coord\\$\boldsymbol{c}\!\leftrightarrow\!\boldsymbol{g}$};
-            \node[raw]   (sh)  at (11.0, 1.2) {$\hat{\boldsymbol{s}}{=}\boldsymbol{\Psi}\hat{\boldsymbol{c}}$};
-            \node[raw]   (gh)  at (11.0,-1.2) {$\hat{\boldsymbol{g}}$};
-            \node[dec]   (out) at (14.6, 0.0) {gain-match\\+ PSNR};
-
-            \draw[flowarr] (s.east) -- (y.west);
-            \draw[flowarr] (g.east) -- (y.west);
-            \draw[flowarr] (y) -- (alt);
-            \draw[flowarr] (alt.east) -- (sh.west);
-            \draw[flowarr] (alt.east) -- (gh.west);
-            \draw[flowarr] (sh) -- (out);
-            \draw[flowarr] (gh) -- (out);
-
-            \node[font=\scriptsize, anchor=north, text=black!65] at (1.7,-2.1)
-            {$\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$};
-            \node[font=\scriptsize, anchor=north, text=black!65] at (5.4,-2.1)
-            {Gaussian $\boldsymbol{A}$, AWGN};
-            \node[font=\scriptsize, anchor=north, text=black!65] at (9.2,-2.1)
-            {LISTA / FISTA + ridge};
-            \node[font=\scriptsize, anchor=north, text=black!65] at (12.8,-2.1)
-            {$a^\star\!=\!\langle\hat{\boldsymbol{s}},\boldsymbol{s}\rangle/\|\hat{\boldsymbol{s}}\|^2$};
-          \end{tikzpicture}
-          \caption{End-to-end our framework. The RAW signal
-            $\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$ is measured via Gaussian
-            $\boldsymbol{A}$; block-coordinate alternation recovers
-            $(\boldsymbol{c},\boldsymbol{g})$ simultaneously; the scalar gain
-            ambiguity is resolved at evaluation.}
-        \end{figure}
-
-      \end{block}
-
-      \medskip
-
-      \begin{block}{Block-Coordinate Recipe}
-
-      \begin{enumerate}\setlength{\itemsep}{0.18em}
-          \item Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$,
-            $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$.
-          \item \textbf{$\boldsymbol{c}$-update.} Hold $\boldsymbol{g}^{(t)}$; run
-            $T_c$ FISTA (or $K$ LISTA) steps on
-            $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t)})$.
-          \item \textbf{$\boldsymbol{g}$-update.} Hold $\boldsymbol{c}^{(t{+}1)}$; solve
-            $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
-            in closed form; clamp to $[\epsilon_g,\infty)$.
-          \item Repeat $T_\textrm{outer}{=}8$ outer iterations.
-          \item Resolve scalar gain ambiguity at evaluation.
-        \end{enumerate}
+        Naive Adam at $5{\times}10^{-3}$ produces a clean descent to
+        $0.12$ NMSE, then blows up to $\sim\!10^3$. Diagnosing,
+        $\rho(\boldsymbol{W}_t){>}1$ along some eigendirection causes the
+        recurrence to diverge. The fix combines (i) lowering
+        lr$\to\!10^{-3}$, (ii) gradient clip-norm $1.0$, and
+        (iii) restoring the best-validation checkpoint.
 
       \end{block}
 
@@ -422,24 +386,28 @@
           \toprule
           \textbf{$\delta=M/N$} & $0.30$ & $0.50$ & $0.70$ & $0.90$ \\
           \midrule
-          OMC $\rho^\star$   & $\mathbf{0.35}$ & $\mathbf{0.40}$ & $0.40$         & $0.50$ \\
+          OMP $\rho^\star$   & $\mathbf{0.35}$ & $\mathbf{0.40}$ & $0.40$         & $0.50$ \\
           FISTA $\rho^\star$ & $0.20$ & $0.30$ & $\mathbf{0.50}$ & $\mathbf{0.65}$ \\
           \bottomrule
         \end{tabular}
 
         \medskip
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item \textbf{OMP wins at low $\delta$:} exact LS-on-support
-            beats $\ell_1$ when measurements are scarce.
-          \item \textbf{FISTA wins at high $\delta$:} $\ell_1$ keeps
-            expanding the feasible region; OMP plateaus on dense
-            supports.
-          \item \textbf{Crossover} near $\delta{\approx}0.65$.
-        \end{itemize}
+        \textbf{OMP wins at low $\delta$} because exact LS-on-support
+        beats $\ell_1$ when measurements are scarce, whereas
+        \textbf{FISTA wins at high $\delta$} because $\ell_1$ keeps
+        expanding the feasible region while OMP plateaus on dense
+        supports. The crossover sits near $\delta{\approx}0.65$.
 
       \end{exampleblock}
 
-      \medskip
+    \end{column}
+
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 3 -- Results: Rate-Dist, LISTA, Joint, Limits
+    % ============================================================
+    \begin{column}{\colwidth}
 
       \begin{block}{Rate-Distortion (Sec.~3.3)}
 
@@ -468,22 +436,13 @@
 
       \end{block}
 
-    \end{column}
-
-    \separatorcolumn
-
-    % ============================================================
-    % COLUMN 4 -- LISTA + Joint vs Sequential + Limitations + Refs
-    % ============================================================
-    \begin{column}{\colwidth}
+      \medskip
 
       \begin{block}{LISTA vs.\ Classical at Matched Compute}
 
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item \textbf{Setup.} $K{=}10$ tied-weight LISTA, $5000$
-            synthetic $(\boldsymbol{y},\boldsymbol{c})$ pairs, $N{=}200, M{=}80, S{=}10$,
-            SNR${=}30$\,dB.
-        \end{itemize}
+        \textbf{Setup.} $K{=}10$ tied-weight LISTA trained on $5000$
+        synthetic $(\boldsymbol{y},\boldsymbol{c})$ pairs with $N{=}200$, $M{=}80$,
+        $S{=}10$, and SNR${=}30$\,dB.
 
         \medskip
         \centering\small
@@ -524,7 +483,7 @@
           \begin{tikzpicture}
             \begin{axis}[
                 width=0.95\textwidth,
-                height=0.45\textwidth,
+                height=0.25\textwidth,
                 ybar,
                 bar width=4.5pt,
                 enlarge x limits=0.10,
@@ -561,58 +520,40 @@
                 (0.20,-10.03) (0.30,-9.51) (0.40,-7.76) (0.50,-9.05) (0.60,-8.37)
               };
               \draw[black!50, dashed, very thick]
-                ({rel axis cs:0,0} -| {axis cs:0.20,0}) --
-                ({rel axis cs:1,0} -| {axis cs:0.60,0});
+              ({rel axis cs:0,0} -| {axis cs:0.20,0}) --
+              ({rel axis cs:1,0} -| {axis cs:0.60,0});
               \legend{cameraman,astronaut,coins,page,moon}
             \end{axis}
           \end{tikzpicture}
-          \caption{Per-scene PSNR gain of our framework over the sequential
-            baseline. Textured scenes (cameraman, astronaut) gain
-            $+1.1$ to $+4.7$\,dB; coins/page are roughly a wash;
+          \caption{Per-scene PSNR gain over the sequential baseline.
+            Textured wins $+1.1$ to $+4.7$\,dB on cameraman, astronaut;
             \textbf{moon collapses by $\sim 8$\,dB} -- a real,
-            mechanism-explainable failure mode.}
+          mechanism-explainable failure mode.}
         \end{figure}
 
       \end{exampleblock}
 
       \medskip
 
-      \begin{block}{Why Moon Fails (and Why That's Informative)}
+      \begin{block}{Why Moon Fails \& Limitations}
 
-        Moon's centre patch is mostly black sky with a thin sliver of
-        bright surface. After $8{\times}$ gradient multiplication, most
-        columns carry near-zero energy, so
-        $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$ is severely rank-deficient and
-        per-column gains are non-identifiable. The alternation then
-        drives $\boldsymbol{g}$ to a high-variance solution that fits noise.
+        Moon's centre patch is mostly black sky after $8{\times}$ gradient
+        multiplication, so $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$ becomes
+        rank-deficient and per-column gains are non-identifiable; the
+        alternation then drives $\boldsymbol{g}$ to a noise-fitting solution.
         The sequential pipeline avoids this by \emph{never} estimating
-        $\boldsymbol{g}$ from data -- its column-mean divisor is essentially
-        a copy of the gradient. \textbf{When the scene cannot identify
+        $\boldsymbol{g}$ -- its column-mean divisor is essentially a copy
+        of the gradient. \textbf{When the scene cannot identify
         $\boldsymbol{g}$, refusing to estimate it is a virtue.}
+        \textbf{Deployment rule:} gate the joint solution on
+        $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}){<}\tau$ and fall back
+        to sequential otherwise.
 
         \medskip
-        \textbf{Deployment rule:} gate the joint solution on
-        $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}){<}\tau$; fall back to
-        sequential otherwise. Not reported in prior CS$+$ISP literature.
-
-      \end{block}
-
-      \medskip
-
-      \begin{block}{Limitations \& Future Work}
-
-      \begin{itemize}\setlength{\itemsep}{0.12em}
-          \item \textbf{Scene-dependent failure} on near-uniform images
-            (moon $-8$\,dB) needs an identifiability gate.
-          \item \textbf{1D illumination model} suits horizontal
-            gradients; 2D vignettes need a richer $\boldsymbol{g}$ prior.
-          \item \textbf{Synthetic-trained LISTA} would need
-            distribution-wide training for noise generalisation.
-          \item \textbf{Simulated measurements only}; physical
-            coded-aperture validation remains future work.
-          \item \textbf{Outer-loop unfolding} (not just $\boldsymbol{c}$-step)
-            would yield spatially-adaptive thresholds.
-        \end{itemize}
+        \textbf{Other limitations.} The 1D illumination model suits
+        horizontal gradients (2D vignettes need a richer prior);
+        synthetic-trained LISTA needs distribution-wide noise training;
+        coded-aperture validation and outer-loop unfolding are future work.
 
       \end{block}
 
@@ -622,7 +563,7 @@
 
         \nocite{*}
         \renewcommand{\bibsep}{1pt}
-        {\fontsize{14pt}{17pt}\selectfont
+        {\fontsize{11pt}{13pt}\selectfont
         \bibliographystyle{plainnat}\bibliography{poster}}
 
       \end{block}
