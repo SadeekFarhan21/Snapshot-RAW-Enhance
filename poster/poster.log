@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.1)  1 JUN 2026 01:31
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.1)  1 JUN 2026 02:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1403,60 +1403,21 @@ pdf)
 File: logos/green-dartmouth-engineering-horizontal-logo.pdf Graphic file (type 
 pdf)
 <use logos/green-dartmouth-engineering-horizontal-logo.pdf>
-LaTeX Font Info:    Calculating math sizes for size <25.88> on input line 575.
+LaTeX Font Info:    Calculating math sizes for size <25.88> on input line 579.
 
-
-Package natbib Warning: Citation `candes2006stable' on page 1 undefined on inpu
-t line 575.
-
-
-Package natbib Warning: Citation `donoho2006compressed' on page 1 undefined on 
-input line 575.
-
-
-Package natbib Warning: Citation `gregor2010lista' on page 1 undefined on input
- line 575.
-
-
-Underfull \hbox (badness 1642) in paragraph at lines 575--575
+Underfull \hbox (badness 1642) in paragraph at lines 579--579
 []\TU/Lato(1)/b/n/25.88 Scene-dependent benchmark. \TU/Lato(1)/m/n/25.88 Phase 
 transition, multi-image rate-distortion, LISTA-vs-
  []
 
-
-Package natbib Warning: Citation `candes2006stable' on page 1 undefined on inpu
-t line 575.
-
-! Missing { inserted.
-<to be read again> 
-                   \def 
-l.575 \end{frame}
-                 
-A left brace was mandatory here, so I've put one in.
-You might want to delete and/or insert some corrections
-so that I will find a matching right brace soon.
-(If you're confused by all this, try typing `I}' now.)
-
-! Missing } inserted.
-<inserted text> 
-                }
-l.575 \end{frame}
-                 
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-LaTeX Font Info:    Calculating math sizes for size <44.72> on input line 575.
-LaTeX Font Info:    Calculating math sizes for size <17.97> on input line 575.
-LaTeX Font Info:    Calculating math sizes for size <14.98> on input line 575.
+LaTeX Font Info:    Calculating math sizes for size <17.97> on input line 579.
+LaTeX Font Info:    Calculating math sizes for size <14.98> on input line 579.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <7.48999> on input line 575.
+(Font)              <7.48999> on input line 579.
 ! Missing { inserted.
 <to be read again> 
                    \def 
-l.575 \end{frame}
+l.579 \end{frame}
                  
 A left brace was mandatory here, so I've put one in.
 You might want to delete and/or insert some corrections
@@ -1466,7 +1427,7 @@ so that I will find a matching right brace soon.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.575 \end{frame}
+l.579 \end{frame}
                  
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -1477,7 +1438,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing { inserted.
 <to be read again> 
                    \def 
-l.575 \end{frame}
+l.579 \end{frame}
                  
 A left brace was mandatory here, so I've put one in.
 You might want to delete and/or insert some corrections
@@ -1487,7 +1448,7 @@ so that I will find a matching right brace soon.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.575 \end{frame}
+l.579 \end{frame}
                  
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -1498,7 +1459,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing { inserted.
 <to be read again> 
                    \def 
-l.575 \end{frame}
+l.579 \end{frame}
                  
 A left brace was mandatory here, so I've put one in.
 You might want to delete and/or insert some corrections
@@ -1508,7 +1469,7 @@ so that I will find a matching right brace soon.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.575 \end{frame}
+l.579 \end{frame}
                  
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -1517,11 +1478,7 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-Package natbib Warning: Citation `gregor2010lista' on page 1 undefined on input
- line 575.
-
-
-Underfull \hbox (badness 2951) in paragraph at lines 575--575
+Underfull \hbox (badness 5847) in paragraph at lines 579--579
 []\TU/Lato(1)/m/n/25.88 Empirical Donoho–Tanner boundary on synthetic Gaussian 
 CS, $\OML/lmm/m/it/25.88 N[]\OT1/lmr/m/n/25.88 200$\TU/Lato(1)/m/n/25.88 , $\OT
 1/lmr/m/n/25.88 20$ \TU/Lato(1)/m/n/25.88 trials/cell,
@@ -1530,7 +1487,7 @@ CS, $\OML/lmm/m/it/25.88 N[]\OT1/lmr/m/n/25.88 200$\TU/Lato(1)/m/n/25.88 , $\OT
 ! Missing { inserted.
 <to be read again> 
                    \def 
-l.575 \end{frame}
+l.579 \end{frame}
                  
 A left brace was mandatory here, so I've put one in.
 You might want to delete and/or insert some corrections
@@ -1540,7 +1497,7 @@ so that I will find a matching right brace soon.
 ! Missing { inserted.
 <to be read again> 
                    \def 
-l.575 \end{frame}
+l.579 \end{frame}
                  
 A left brace was mandatory here, so I've put one in.
 You might want to delete and/or insert some corrections
@@ -1550,7 +1507,7 @@ so that I will find a matching right brace soon.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.575 \end{frame}
+l.579 \end{frame}
                  
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -1561,7 +1518,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.575 \end{frame}
+l.579 \end{frame}
                  
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -1570,24 +1527,29 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 575--575
+Underfull \hbox (badness 10000) in paragraph at lines 579--579
 []$\OT1/lmr/m/n/25.88 8[]$ \TU/Lato(1)/m/n/25.88 horizontal illumination gradie
 nt, SNR$[]\OT1/lmr/m/n/25.88 25$\TU/Lato(1)/m/n/25.88 dB, $\OT1/lmr/m/n/25.88 1
 6[]16$ \TU/Lato(1)/m/n/25.88 center patch per scene.
  []
 
-Package pgfplots info on input line 575: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 579: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 
-Overfull \hbox (30.03055pt too wide) in paragraph at lines 575--575
+Overfull \hbox (30.03055pt too wide) in paragraph at lines 579--579
  [] 
  []
 
-No file poster.bbl.
+(./poster.bbl
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\translate ' on input line 1.
+
+)
 File: logos/green-dartmouth-engineering-horizontal-logo.pdf Graphic file (type 
 pdf)
 <use logos/green-dartmouth-engineering-horizontal-logo.pdf>
-[1
+ [1
 
 ]
 \tf@nav=\write6
@@ -1599,24 +1561,20 @@ pdf)
 \tf@snm=\write8
 \openout8 = `poster.snm'.
 
-
-
-Package natbib Warning: There were undefined citations.
-
-(./poster.aux)
+ (./poster.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `poster.out' has not changed.
-(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+(rerunfilecheck)             Checksum: AEA4B6A8AE45636C75679C2F0DFA4493;93.
  ) 
 Here is how much of TeX's memory you used:
- 41149 strings out of 468168
- 1002423 string characters out of 5432816
- 1793678 words of memory out of 5000000
- 69047 multiletter control sequences out of 15000+600000
- 795936 words of font info for 279 fonts, out of 8000000 for 9000
+ 41155 strings out of 468168
+ 1002621 string characters out of 5432816
+ 1806779 words of memory out of 5000000
+ 69050 multiletter control sequences out of 15000+600000
+ 772353 words of font info for 252 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  128i,21n,123p,727b,3135s stack positions out of 10000i,1000n,20000p,200000b,200000s
 

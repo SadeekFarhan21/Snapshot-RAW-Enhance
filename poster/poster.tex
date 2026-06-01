@@ -86,80 +86,32 @@
     % ============================================================
     \begin{column}{\colwidth}
 
-      \begin{block}{Motivation}
+      \begin{block}{Background \& Motivation}
 
-        \textbf{Cameras sample then throw away.} A JPEG keeps only
-        $5$--$10\%$ of DCT coefficients, and the ISP further reshapes
-        the data through demosaicing, tone-mapping, and white-balance.
-        Compressed sensing reverses this: $M\!\ll\! N$ random
-        measurements suffice if the signal is sparse
-        \citep{candes2006stable,donoho2006compressed}.
+        \heading{Cameras sample then throw away}
+        A JPEG keeps only $5$--$10\%$ of DCT coefficients, and the
+        ISP further reshapes the data through demosaicing,
+        tone-mapping, and white-balance. By the time bits leave the
+        sensor, most of what was measured is gone --- yet acquiring
+        every pixel at the sensor still dominates power and shutter
+        time on mobile and embedded platforms.
 
-        \medskip
-        \textbf{The sequential pipeline wastes its prior.}
-        RAW sensors measure $\boldsymbol{x}=\boldsymbol{s}\odot\boldsymbol{g}$,
-        the \emph{product} of sparse reflectance and a smooth
-        illumination field. CS-then-correct enforces $\ell_1$ on
-        $\boldsymbol{x}$, but $\boldsymbol{x}$ is \emph{not} DCT-sparse;
-        multiplication by $\boldsymbol{g}$ destroys the sparsity the
-        regularizer relies on. Post-hoc column-mean correction can
-        rescale but cannot restore information already shrunken away.
+        \heading{Compressed sensing reverses the order}
+        Instead of sample-then-throw-away, take $M\!\ll\!N$ random
+        linear measurements and reconstruct via sparsity. The CS
+        framework is provably exact when the signal is sparse in some
+        basis $\bm{\Psi}$ and the sensing matrix $\boldsymbol{A}$ is
+        incoherent with it
+        \citep{candes2006stable,donoho2006compressed} --- the same
+        principle that underpins single-pixel cameras, snapshot
+        hyperspectral imaging, and accelerated MRI.
 
-      \end{block}
-
-      \medskip
-
-      \begin{alertblock}{Our Contributions}
-
-        \textbf{Joint recovery objective.} A single $\ell_1{+}$smooth-prior
-        problem in $(\boldsymbol{c},\boldsymbol{g})$ solved by block-coordinate
-        alternation: FISTA on $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
-
-        \medskip
-        \textbf{Deep-unfolded inner solver.} A $K{=}10$-layer
-        LISTA \citep{gregor2010lista} with Adam, gradient clipping
-        and best-checkpoint restore for stability.
-
-        \medskip
-        \textbf{Scene-dependent benchmark.} Phase transition, multi-image
-        rate-distortion, LISTA-vs-classical, and per-scene illumination
-        ablation on $5$ natural images.
-
-        \medskip
-        \textbf{Honest failure-mode analysis.} Joint catastrophically
-        fails on near-uniform scenes (moon, $-8$\,dB); we trace it to
-        rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$.
-
-      \end{alertblock}
-
-      \medskip
-
-      \begin{exampleblock}{Big Takeaway}
-
-        \large
-        \textbf{Estimating reflectance and illumination
-          \emph{jointly} beats the conventional CS-then-correct
-          pipeline by up to $+4.7$\,dB on textured scenes ---
-          \emph{when} the scene has enough column-wise energy to
-        identify the gain.}
-
-        \medskip\normalsize
-        \textbf{Textured wins} of $+1.1$ to $+4.7$\,dB on cameraman
-        and astronaut; \textbf{LISTA speedup} where $K{=}10$ layers
-        match FISTA at $22$ iterations; \textbf{failure mode} of
-        $-8$\,dB on near-uniform moon -- exposing the need for an
-        identifiability gate.
-
-      \end{exampleblock}
-
-      \medskip
-
-      \begin{block}{Background: Compressed Sensing}
-
-        With $\boldsymbol{x}{=}\bm{\Psi}\boldsymbol{c}$ and $\|\boldsymbol{c}\|_0\!\leq\!S$, the
-        forward model is
-        $\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$, $\boldsymbol{A}{\in}\mathbb R^{M{\times}N}$.
-        If $\boldsymbol{A}$ satisfies the RIP with
+        \heading{Forward model and Lasso recovery}
+        With $\boldsymbol{x}{=}\bm{\Psi}\boldsymbol{c}$ and
+        $\|\boldsymbol{c}\|_0\!\leq\!S$, the forward model is
+        $\boldsymbol{y}{=}\boldsymbol{A}\boldsymbol{x}{+}\boldsymbol{w}$,
+        $\boldsymbol{A}{\in}\mathbb R^{M{\times}N}$. If
+        $\boldsymbol{A}$ satisfies the RIP with
         $\delta_{2S}\!<\!\sqrt 2{-}1$, the Lasso relaxation
         \[
           \boldsymbol{c}_\lambda
@@ -167,28 +119,104 @@
           +\lambda\|\boldsymbol{c}\|_1
         \]
         recovers $\boldsymbol{c}$ to within $O(\epsilon)$
-        \citep{candes2006stable}. We use the 2D DCT as $\bm{\Psi}$, a
-        strong natural-image sparsifying basis.
+        \citep{candes2006stable}. We use the 2D DCT as $\bm{\Psi}$:
+        natural images concentrate $\geq\!90\%$ of their energy in
+        $<\!10\%$ of low-frequency coefficients.
+
+        \heading{Symbols at a glance}
+        $\boldsymbol{s}$ -- reflectance (sparse in DCT);
+        \;\;$\boldsymbol{g}$ -- illumination (smooth);
+        \;\;$\boldsymbol{x}{=}\boldsymbol{s}\!\odot\!\boldsymbol{g}$ -- RAW pixels;
+        \;\;$\boldsymbol{y}$ -- compressed measurements;
+        \;\;$\boldsymbol{A}{\in}\mathbb R^{M\times N}$ -- Gaussian sensing matrix;
+        \;\;$\bm{\Psi}$ -- 2D DCT basis;
+        \;\;$\boldsymbol{c}{=}\bm{\Psi}^{\!\top}\boldsymbol{s}$ -- sparse coefficients;
+        \;\;$\delta{=}M/N$ -- measurement rate;
+        \;\;$\rho{=}S/M$ -- sparsity rate.
 
       \end{block}
 
-      \medskip
+      \vspace{1ex}
 
-      \begin{block}{Block-Coordinate Recipe}
+      \begin{block}{Problem}
 
-        Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$ and
-        $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$. The
-        \textbf{$\boldsymbol{c}$-update} holds $\boldsymbol{g}^{(t)}$ fixed and runs
-        $T_c$ FISTA (or $K$ LISTA) steps on the effective sensing
-        matrix $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t)})$. The
-        \textbf{$\boldsymbol{g}$-update} then holds $\boldsymbol{c}^{(t{+}1)}$ fixed and
-        solves
-        $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
-        in closed form, clamping to $[\epsilon_g,\infty)$. We repeat
-        for $T_\textrm{outer}{=}8$ outer iterations and resolve the
-        scalar gain ambiguity at evaluation.
+        RAW sensors measure
+        $\boldsymbol{x}=\boldsymbol{s}\odot\boldsymbol{g}$, the
+        \emph{product} of a sparse reflectance $\boldsymbol{s}$ and a
+        smooth illumination field $\boldsymbol{g}$. The conventional
+        \textbf{CS-then-correct} pipeline (i) reconstructs
+        $\boldsymbol{x}$ from $\boldsymbol{y}$ by enforcing $\ell_1$
+        on $\boldsymbol{x}$, then (ii) divides by an illumination
+        estimate (typically a column mean) to recover $\boldsymbol{s}$.
+
+        \medskip
+        \textbf{Two errors compound.}
+        \textbf{Sparsity is broken at the prior:} $\boldsymbol{x}$ is
+        \emph{not} DCT-sparse because pointwise multiplication by
+        $\boldsymbol{g}$ smears DCT energy across coefficients;
+        $\ell_1$ then over-shrinks high-illumination coefficients
+        before correction ever runs. \textbf{Correction is
+        shape-rigid:} a column-mean divisor copies the gradient but
+        cannot restore information already shrunken away.
+
+        \medskip
+        \textbf{The sequential pipeline wastes its prior} -- every
+        $\ell_1$ iteration penalises structure that wasn't really
+        there to begin with. \textbf{Naive fixes don't help:}
+        whitening the measurements requires knowing $\boldsymbol{g}$
+        in advance, and pre-flattening assumes a parametric form
+        that real scenes routinely violate.
 
       \end{block}
+
+      \vspace{1ex}
+
+      \begin{alertblock}{Proposed Solution}
+
+        Estimate reflectance and illumination \textbf{jointly} via a
+        single $\ell_1{+}$smooth-prior objective in
+        $(\boldsymbol{c},\boldsymbol{g})$, solved by block-coordinate
+        alternation. A $K{=}10$-layer LISTA replaces the FISTA inner
+        loop for fast, learned inference.
+
+        \medskip
+        \textbf{Why joint helps.} The illumination $\boldsymbol{g}$
+        is smooth (a Tikhonov prior fits it) and the reflectance
+        $\boldsymbol{s}$ is sparse in DCT (an $\ell_1$ prior fits
+        it). Estimating both at once lets each prior act on the
+        signal it was designed for, instead of forcing one $\ell_1$
+        on the compromised product $\boldsymbol{x}{=}\boldsymbol{s}\odot\boldsymbol{g}$.
+
+        \medskip
+        \textbf{Joint recovery objective.} A single
+        $\ell_1{+}$smooth-prior problem in
+        $(\boldsymbol{c},\boldsymbol{g})$: FISTA / LISTA on
+        $\boldsymbol{c}$, closed-form ridge on $\boldsymbol{g}$.
+
+        \medskip
+        \textbf{Deep-unfolded inner solver.} $K{=}10$-layer LISTA
+        \citep{gregor2010lista} with Adam, gradient clipping,
+        best-checkpoint restore for stability.
+
+        \medskip
+        \textbf{Scene-dependent benchmark.} Phase transition,
+        multi-image rate-distortion, LISTA-vs-classical, per-scene
+        illumination ablation on $5$ natural images.
+
+        \medskip
+        \textbf{Honest failure-mode analysis.} Joint catastrophically
+        fails on near-uniform scenes (moon, $-8$\,dB); traced to
+        rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$,
+        suggesting a deployment-time identifiability gate.
+
+        \medskip
+        \textbf{Headline result.} $+1.1$ to $+4.7$\,dB on textured
+        scenes (cameraman, astronaut); $2.2\times$ inference speedup
+        from LISTA at matched recovery.
+
+      \end{alertblock}
+
+      \vfill
 
     \end{column}
 
@@ -199,8 +227,9 @@
     % ============================================================
     \begin{column}{\colwidth}
 
-      \begin{block}{Encoder $\to$ Decoder Pipeline}
+      \begin{block}{Architecture}
 
+        \heading{Encoder $\to$ Decoder pipeline}
         \begin{figure}
           \centering
           \begin{tikzpicture}[
@@ -253,55 +282,47 @@
           ambiguity is resolved at evaluation.}
         \end{figure}
 
-      \end{block}
-
-      \medskip
-
-      \begin{block}{Method 1: Joint Recovery Objective}
-
+        \heading{Joint recovery objective}
         \textbf{Replace} the two-stage pipeline with a single objective:
         \[
-          \;
           \min_{\boldsymbol{c},\boldsymbol{g}}\;
           \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})
           \bm{\Psi}\boldsymbol{c}-\boldsymbol{y}\big\|_2^2
           +\lambda_c\|\boldsymbol{c}\|_1
-          +\lambda_g\|\nabla\boldsymbol{g}\|_2^2
-          \;
+          +\lambda_g\|\nabla\boldsymbol{g}\|_2^2.
         \]
-        Jointly non-convex but \textbf{block-convex} in each variable.
+        Non-convex jointly but \textbf{block-convex} in each variable:
+        the $\boldsymbol{c}$-step is a standard Lasso (FISTA / LISTA);
+        the $\boldsymbol{g}$-step is closed-form ridge.
 
-        \medskip
-        \textbf{$\boldsymbol{c}$-step.} Fix $\boldsymbol{g}$; effective sensing matrix
-        $\boldsymbol{A}_{\!\textrm{eff}}{=}\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})\bm{\Psi}$,
-        update is a standard Lasso solved by FISTA.
+        \heading{Block-coordinate recipe}
+        Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$,
+        $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$. For
+        $t{=}1,\dots,T_\textrm{outer}{=}8$: the
+        \textbf{$\boldsymbol{c}$-update} runs $T_c$ FISTA (or $K$ LISTA)
+        steps on
+        $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t-1)})$; the
+        \textbf{$\boldsymbol{g}$-update} solves
+        $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
+        in closed form, clamping to $[\epsilon_g,\infty)$.
 
-        \medskip
-        \textbf{$\boldsymbol{g}$-step.} Fix $\boldsymbol{c}$; with $\hat{\boldsymbol{s}}{=}\bm{\Psi}\boldsymbol{c}$
-        the model is linear in $\boldsymbol{g}$,
-        $\boldsymbol{y}{=}\boldsymbol{B}(\hat{\boldsymbol{s}})\boldsymbol{g}{+}\boldsymbol{w}$, and the
-        update is closed-form ridge:
+        \heading{Closed-form $\boldsymbol{g}$-step}
+        With $\hat{\boldsymbol{s}}{=}\bm{\Psi}\boldsymbol{c}$ the model
+        is linear in $\boldsymbol{g}$,
+        $\boldsymbol{y}{=}\boldsymbol{B}(\hat{\boldsymbol{s}})\boldsymbol{g}{+}\boldsymbol{w}$,
+        giving
         \[
           \boldsymbol{g}^\star
           =\bigl(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}+\lambda_g \boldsymbol{L}\bigr)^{-1}\boldsymbol{B}^{\!\top}\boldsymbol{y},
         \]
         with $\boldsymbol{L}{=}\nabla^{\!\top}\!\nabla$ the 1D discrete
-        Laplacian. We clamp $\boldsymbol{g}{\geq}\epsilon_g$ to avoid
-        divide-by-zero.
-
-        \medskip
-        \textbf{Gain ambiguity.} The model has scalar invariance
-        $(\boldsymbol{s},\boldsymbol{g})\!\to\!(a\boldsymbol{s},\boldsymbol{g}/a)$; we resolve at
-        evaluation by the optimal positive gain
+        Laplacian. The scalar invariance
+        $(\boldsymbol{s},\boldsymbol{g})\!\to\!(a\boldsymbol{s},\boldsymbol{g}/a)$
+        is resolved at evaluation by the optimal positive gain
         $a^\star{=}\langle\hat{\boldsymbol{s}},\boldsymbol{s}_\textrm{true}\rangle/\|\hat{\boldsymbol{s}}\|^2$,
         applied identically to baselines.
 
-      \end{block}
-
-      \medskip
-
-      \begin{block}{Method 2: Deep-Unfolded LISTA Inner Solver}
-
+        \heading{Deep-unfolded LISTA inner solver}
         Replace the FISTA $\boldsymbol{c}$-step with $K$ learned layers
         \citep{gregor2010lista}:
         \[
@@ -362,7 +383,6 @@
         \end{figure}
 
         \heading{Stability tricks}
-
         Naive Adam at $5{\times}10^{-3}$ produces a clean descent to
         $0.12$ NMSE, then blows up to $\sim\!10^3$. Diagnosing,
         $\rho(\boldsymbol{W}_t){>}1$ along some eigendirection causes the
@@ -370,79 +390,10 @@
         lr$\to\!10^{-3}$, (ii) gradient clip-norm $1.0$, and
         (iii) restoring the best-validation checkpoint.
 
-      \end{block}
-
-      \medskip
-
-      \begin{exampleblock}{Phase Transition (Sec.~3.2)}
-
-        Empirical Donoho--Tanner boundary on synthetic Gaussian CS,
-        $N{=}200$, $20$ trials/cell, NMSE${<}10^{-3}$.
-
-        \medskip
-        \centering\small
-        \renewcommand{\arraystretch}{1.15}
-        \begin{tabular}{@{}l r r r r@{}}
-          \toprule
-          \textbf{$\delta=M/N$} & $0.30$ & $0.50$ & $0.70$ & $0.90$ \\
-          \midrule
-          OMP $\rho^\star$   & $\mathbf{0.35}$ & $\mathbf{0.40}$ & $0.40$         & $0.50$ \\
-          FISTA $\rho^\star$ & $0.20$ & $0.30$ & $\mathbf{0.50}$ & $\mathbf{0.65}$ \\
-          \bottomrule
-        \end{tabular}
-
-        \medskip
-        \textbf{OMP wins at low $\delta$} because exact LS-on-support
-        beats $\ell_1$ when measurements are scarce, whereas
-        \textbf{FISTA wins at high $\delta$} because $\ell_1$ keeps
-        expanding the feasible region while OMP plateaus on dense
-        supports. The crossover sits near $\delta{\approx}0.65$.
-
-      \end{exampleblock}
-
-    \end{column}
-
-    \separatorcolumn
-
-    % ============================================================
-    % COLUMN 3 -- Results: Rate-Dist, LISTA, Joint, Limits
-    % ============================================================
-    \begin{column}{\colwidth}
-
-      \begin{block}{Rate-Distortion (Sec.~3.3)}
-
-        $5$-image natural-scene set, SNR${=}30$\,dB, $16{\times}16$
-        blocks. Mean PSNR$\pm$std across scenes.
-
-        \medskip
-        \centering\small
-        \renewcommand{\arraystretch}{1.15}
-        \begin{tabular}{@{}l r r r r@{}}
-          \toprule
-          $\delta$ & $0.20$ & $0.40$ & $0.50$ & $0.70$ \\
-          \midrule
-          OMP   & $17.4{\pm}4.3$ & $20.4{\pm}3.7$ & $21.7{\pm}3.2$ & $24.9{\pm}3.0$ \\
-          FISTA & $\mathbf{19.4{\pm}4.5}$ & $\mathbf{23.6{\pm}4.1}$ & $\mathbf{25.1{\pm}3.9}$ & $\mathbf{27.6{\pm}3.5}$ \\
-          ADMM  & $17.6{\pm}4.8$ & $23.5{\pm}4.4$ & $25.0{\pm}4.0$ & $27.5{\pm}3.7$ \\
-          \bottomrule
-        \end{tabular}
-
-        \medskip
-        \raggedright
-        \textbf{Verdict.} FISTA and ADMM agree within $0.5$\,dB above
-        $\delta{=}0.2$ (same Lasso objective); both beat OMP by
-        $2$--$3$\,dB.  Wide std reflects scene difficulty: moon is
-        easy ($>30$\,dB), coins is hard ($\sim20$\,dB).
-
-      \end{block}
-
-      \medskip
-
-      \begin{block}{LISTA vs.\ Classical at Matched Compute}
-
+        \heading{LISTA vs.\ classical at matched compute}
         \textbf{Setup.} $K{=}10$ tied-weight LISTA trained on $5000$
-        synthetic $(\boldsymbol{y},\boldsymbol{c})$ pairs with $N{=}200$, $M{=}80$,
-        $S{=}10$, and SNR${=}30$\,dB.
+        synthetic $(\boldsymbol{y},\boldsymbol{c})$ pairs with
+        $N{=}200$, $M{=}80$, $S{=}10$, SNR${=}30$\,dB.
 
         \medskip
         \centering\small
@@ -460,16 +411,68 @@
           \bottomrule
         \end{tabular}
 
-        \medskip
         \raggedright
         \textbf{$2.2\times$ inference speedup} at matched recovery;
-        LISTA still trails the converged $\ell_1$ minimum by $10\times$,
-        but amortises that gap into a $10\times$ smaller cost at
-        deployment.
+        $10\times$ smaller deployment cost vs.\ converged $\ell_1$.
 
       \end{block}
 
-      \medskip
+    \end{column}
+
+    \separatorcolumn
+
+    % ============================================================
+    % COLUMN 3 -- Results: Headline, Rate-Dist, LISTA, Joint, Limits
+    % ============================================================
+    \begin{column}{\colwidth}
+
+      \begin{block}{Results \& Benchmarks}
+
+        \heading{Phase transition}
+        Empirical Donoho--Tanner boundary on synthetic Gaussian CS,
+        $N{=}200$, $20$ trials/cell, NMSE${<}10^{-3}$.
+
+        \medskip
+        \centering\small
+        \renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}l r r r r@{}}
+          \toprule
+          \textbf{$\delta=M/N$} & $0.30$ & $0.50$ & $0.70$ & $0.90$ \\
+          \midrule
+          OMP $\rho^\star$   & $\mathbf{0.35}$ & $\mathbf{0.40}$ & $0.40$         & $0.50$ \\
+          FISTA $\rho^\star$ & $0.20$ & $0.30$ & $\mathbf{0.50}$ & $\mathbf{0.65}$ \\
+          \bottomrule
+        \end{tabular}
+
+        \raggedright
+        \textbf{OMP wins low $\delta$}, \textbf{FISTA wins high
+        $\delta$}; crossover near $\delta{\approx}0.65$.
+
+        \heading{Rate-distortion}
+        $5$-image natural-scene set, SNR${=}30$\,dB, $16{\times}16$
+        blocks. Mean PSNR$\pm$std across scenes.
+
+        \medskip
+        \centering\small
+        \renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}l r r r r@{}}
+          \toprule
+          $\delta$ & $0.20$ & $0.40$ & $0.50$ & $0.70$ \\
+          \midrule
+          OMP   & $17.4{\pm}4.3$ & $20.4{\pm}3.7$ & $21.7{\pm}3.2$ & $24.9{\pm}3.0$ \\
+          FISTA & $\mathbf{19.4{\pm}4.5}$ & $\mathbf{23.6{\pm}4.1}$ & $\mathbf{25.1{\pm}3.9}$ & $\mathbf{27.6{\pm}3.5}$ \\
+          ADMM  & $17.6{\pm}4.8$ & $23.5{\pm}4.4$ & $25.0{\pm}4.0$ & $27.5{\pm}3.7$ \\
+          \bottomrule
+        \end{tabular}
+
+        \raggedright
+        FISTA and ADMM agree within $0.5$\,dB (same Lasso objective)
+        and both beat OMP by $2$--$3$\,dB; wide std reflects scene
+        difficulty.
+
+      \end{block}
+
+      \vspace{1ex}
 
       \begin{exampleblock}{Joint vs.\ Sequential: Per-Scene PSNR Gain (dB)}
 
@@ -483,7 +486,7 @@
           \begin{tikzpicture}
             \begin{axis}[
                 width=0.95\textwidth,
-                height=0.25\textwidth,
+                height=0.20\textwidth,
                 ybar,
                 bar width=4.5pt,
                 enlarge x limits=0.10,
@@ -535,8 +538,9 @@
 
       \medskip
 
-      \begin{block}{Why Moon Fails \& Limitations}
+      \begin{block}{Limitations}
 
+        \heading{Failure mode: near-uniform scenes}
         Moon's centre patch is mostly black sky after $8{\times}$ gradient
         multiplication, so $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$ becomes
         rank-deficient and per-column gains are non-identifiable; the
@@ -549,21 +553,21 @@
         $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}){<}\tau$ and fall back
         to sequential otherwise.
 
-        \medskip
-        \textbf{Other limitations.} The 1D illumination model suits
-        horizontal gradients (2D vignettes need a richer prior);
-        synthetic-trained LISTA needs distribution-wide noise training;
-        coded-aperture validation and outer-loop unfolding are future work.
+        \heading{Other limitations}
+        The 1D illumination model suits horizontal gradients (2D
+        vignettes need a richer prior); synthetic-trained LISTA needs
+        distribution-wide noise training; coded-aperture validation
+        and outer-loop unfolding are future work.
 
       \end{block}
 
-      \medskip
+      \vfill
 
       \begin{block}{References}
 
         \nocite{*}
         \renewcommand{\bibsep}{1pt}
-        {\fontsize{11pt}{13pt}\selectfont
+        {\fontsize{14pt}{16pt}\selectfont
         \bibliographystyle{plainnat}\bibliography{poster}}
 
       \end{block}
