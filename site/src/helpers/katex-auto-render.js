@@ -68,8 +68,7 @@ const splitAtDelimiters = function(startData, leftDelim, rightDelim, display) {
         lookingForLeft = false;
       }
 
-      while (true) {
-        // eslint-disable-line no-constant-condition
+      while (true) { // eslint-disable-line no-constant-condition
         if (lookingForLeft) {
           nextIndex = text.indexOf(leftDelim, currIndex);
           if (nextIndex === -1) {

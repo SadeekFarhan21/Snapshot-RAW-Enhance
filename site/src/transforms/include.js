@@ -26,7 +26,4 @@ export default function(dom, data) {
       el.innerHTML = body.toString();
     });
   });
-  data.bibliography = bibliography;
-  data.citations = citations;
-
 }

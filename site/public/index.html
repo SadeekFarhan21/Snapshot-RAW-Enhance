@@ -262,7 +262,7 @@
 
     <p>The traditional camera pipeline samples at Shannon&ndash;Nyquist rates, compresses to a sparse representation, and only afterwards performs illumination correction on the decoded image. This sequential ordering discards information: sparse recovery applied to a signal whose dynamic range is dominated by an unknown multiplicative illumination field has weaker recovery guarantees than the same recovery applied to the underlying reflectance. We formulate our framework, a single inverse problem in the joint variables of DCT-domain reflectance coefficients and a smooth per-column illumination field, and solve it by block-coordinate alternation between a learned-iterative-shrinkage step on the coefficients and a closed-form ridge step on the illumination.</p>
 
-    <p>Across six experiments on a 5-image natural-scene set &mdash; an empirical Donoho&ndash;Tanner phase transition, a multi-image rate-distortion sweep, a deep-unfolded LISTA solver, a per-scene joint-vs-sequential ablation under an <d-math>8\times</d-math> illumination gradient, a noise-robustness sweep across SNR<d-math>\in[5, 35]</d-math>&nbsp;dB, and a falsification study of a proposed identifiability gate &mdash; we find that the joint formulation outperforms the sequential one by up to 4.7&nbsp;dB PSNR on textured scenes (cameraman, astronaut), that a <d-math>K{=}10</d-math> unrolled LISTA matches what FISTA needs <d-math>22</d-math> iterations to reach, and that above <d-math>20</d-math>&nbsp;dB SNR the residual PSNR error is dominated by 2D-DCT basis mismatch rather than measurement noise.</p>
+    <p>Across six experiments on a 5-image natural-scene set, we find that the joint formulation outperforms the sequential one by up to 4.7&nbsp;dB PSNR on textured scenes. Separately, across five optimizer seeds on one fixed sparse-recovery problem, a <d-math>K{=}10</d-math> LISTA obtains NMSE <d-math>0.0435\pm0.0120</d-math>, which FISTA needs <d-math>23</d-math> iterations to match. Batch-1 CPU latency at <d-math>N{=}200</d-math> is nevertheless 0.664&nbsp;ms for LISTA versus 0.484&nbsp;ms for FISTA, so iteration reduction is not hardware speedup.</p>
 
     <p>We also report a clear failure mode &mdash; on near-uniform scenes (<em>moon</em>) the joint <d-math>g</d-math>-update lacks signal to estimate gain from and the method degrades by <d-math>{\sim}8</d-math>&nbsp;dB &mdash; and explicitly <em>rule out</em> the <d-math>\kappa(B^\top B)</d-math> conditioning gate one would naturally propose: the worst-performing scene has the lowest <d-math>\kappa</d-math>. The actual failure mechanism is scene-energy deficiency in the early c-step, and we identify the correct gate signal as <d-math>\|\hat{s}\|_2</d-math> rather than <d-math>\kappa</d-math>.</p>
 
@@ -351,11 +351,11 @@
 
     <p>Initializing <d-math>W_e = (1/L)(A\Psi)^\top</d-math>, <d-math>W_t = I - (1/L)(A\Psi)^\top A\Psi</d-math>, and <d-math>\theta_k = \lambda/L</d-math> exactly reproduces ISTA at training-step zero. End-to-end training on supervised <d-math>(y, c)</d-math> pairs minimizes MSE on <d-math>c</d-math> and lets the thresholds adapt.</p>
 
-    <aside><em>Training stability.</em> The <d-math>K</d-math>-layer recurrence is sensitive to the spectral radius of <d-math>W_t</d-math>. With Adam at <d-math>\text{lr}{=}5{\times}10^{-3}</d-math>, training first descended cleanly to NMSE<d-math>{=}0.12</d-math> at epoch&nbsp;10, then blew up to <d-math>{\sim}10^3</d-math> for several epochs before re-stabilizing. We adopt gradient-norm clipping at <d-math>1.0</d-math>, lr <d-math>{=}10^{-3}</d-math>, and best-checkpoint restore. Stable across seeds.</aside>
+    <aside><em>Training stability.</em> The <d-math>K</d-math>-layer recurrence is sensitive to the spectral radius of <d-math>W_t</d-math>. We use gradient-norm clipping at <d-math>1.0</d-math>, lr <d-math>{=}10^{-3}</d-math>, and best-checkpoint restoration. Across five optimizer seeds, validation NMSE ranges from 0.0291 to 0.0572.</aside>
 
     <h2 id="experiments">Experiments</h2>
 
-    <p>All experiments use Python&nbsp;3, NumPy, SciPy, scikit-image, and PyTorch (CPU). RNGs are seeded. The sensing matrix is column-normalized i.i.d.&nbsp;Gaussian unless stated otherwise. <em>Note: on multi-core machines, set <code>OPENBLAS_NUM_THREADS=2</code> to avoid small-matrix thread-contention slowdowns.</em></p>
+    <p>Classical experiments use Python&nbsp;3, NumPy, SciPy, and scikit-image. Five-seed LISTA training uses PyTorch&nbsp;2.7 with CUDA&nbsp;12.8 on a Quadro RTX&nbsp;8000; latency is measured separately with one CPU thread. RNGs are seeded.</p>
 
     <h3 id="phase">Phase transition</h3>
 
@@ -397,24 +397,24 @@
 
     <h3 id="lista">LISTA vs.&nbsp;classical solvers at matched compute</h3>
 
-    <p>Train <d-math>K = 10</d-math>-layer LISTA (tied <d-math>W_e, W_t</d-math>, per-layer learned <d-math>\theta_k</d-math>) on <d-math>5000</d-math> synthetic <d-math>(y, c)</d-math> pairs at <d-math>N{=}200, M{=}80, S{=}10</d-math>, SNR<d-math>{=}30</d-math>&nbsp;dB. Compare against ISTA/FISTA at exactly <d-math>K = 10</d-math> iterations.</p>
+    <p>Train <d-math>K = 10</d-math>-layer LISTA on <d-math>5000</d-math> synthetic pairs at <d-math>N{=}200, M{=}80, S{=}10</d-math>, SNR<d-math>{=}30</d-math>&nbsp;dB. The operator and data stay fixed while optimizer initialization is repeated for five seeds.</p>
 
     <table>
       <thead><tr><th>Solver</th><th>Iterations / Layers</th><th>Val NMSE</th></tr></thead>
       <tbody>
         <tr><td>ISTA</td><td>10</td><td>0.4667</td></tr>
         <tr><td>FISTA</td><td>10</td><td>0.3369</td></tr>
-        <tr><td>LISTA</td><td>10</td><td>0.0501</td></tr>
-        <tr><td>FISTA (matched NMSE)</td><td>22</td><td>&asymp; 0.05</td></tr>
+        <tr><td>LISTA (5 seeds)</td><td>10</td><td>0.0435 &plusmn; 0.0120</td></tr>
+        <tr><td>FISTA (matched NMSE)</td><td>23</td><td>&asymp; 0.0435</td></tr>
         <tr><td>FISTA (converged)</td><td>500</td><td>0.0050</td></tr>
       </tbody>
     </table>
 
-    <p>LISTA reaches at <d-math>K{=}10</d-math> what FISTA needs <d-math>22</d-math> iterations to reach &mdash; a <d-math>{\sim}2.2\times</d-math> iteration speedup at the same recovery quality. LISTA still trails the converged <d-math>\ell_1</d-math> minimum by <d-math>{\sim}10\times</d-math> but amortizes that gap into a much smaller inference cost.</p>
+    <p>LISTA reaches at <d-math>K{=}10</d-math> what FISTA needs <d-math>23</d-math> iterations to reach: a <d-math>2.3\times</d-math> iteration reduction. It is not a latency win. At <d-math>N{=}200</d-math>, LISTA-10 takes 0.664&nbsp;ms and 0.279&nbsp;MiB of working state versus 0.484&nbsp;ms and 0.066&nbsp;MiB for FISTA-23. At <d-math>N{=}1024</d-math>, dense LISTA takes 8.650&nbsp;ms versus 3.942&nbsp;ms for FISTA.</p>
 
     <figure>
       <img src="figures/lista_comparison.png" alt="LISTA training curve and matched-compute comparison">
-      <figcaption><em>Figure 3.</em> Left: LISTA training curve. Right: validation NMSE vs iteration count for ISTA/FISTA, with LISTA's <d-math>K{=}10</d-math> NMSE as the horizontal dashed line.</figcaption>
+      <figcaption><em>Figure 3.</em> Left: five LISTA training runs. Right: ISTA/FISTA NMSE versus iteration count, with the LISTA mean and variability.</figcaption>
     </figure>
 
     <h3 id="joint-vs-seq">Joint vs.&nbsp;sequential under an 8&times; illumination gradient</h3>
@@ -489,18 +489,18 @@
       </tbody>
     </table>
 
-    <p><strong>Moon &mdash; the worst-performing scene for the joint pipeline &mdash; has the <em>lowest</em> <d-math>\log_{10}\kappa</d-math>.</strong> The best <d-math>\kappa</d-math>-gate found by sweep (<d-math>\tau^\star = 1.37</d-math>) recovers only 0.02&nbsp;dB on average over sequential-only, because it correctly routes <em>cameraman</em> and <em>coins</em> to joint but still routes <em>moon</em> to joint and misroutes <em>page</em> away from sequential.</p>
+    <p><strong>Moon &mdash; the worst-performing scene for the joint pipeline &mdash; has the <em>lowest</em> <d-math>\log_{10}\kappa</d-math>.</strong> The best <d-math>\kappa</d-math>-gate found by sweep (<d-math>\tau^\star = 1.37</d-math>) recovers only 0.01&nbsp;dB on average over sequential-only, because it correctly routes <em>cameraman</em> and <em>coins</em> to joint but still routes <em>moon</em> to joint and misroutes <em>page</em> away from sequential.</p>
 
     <p>The mechanism behind the moon failure is therefore not Gram-matrix rank-deficiency: it is <strong>scene-energy deficiency</strong>. The <d-math>c</d-math>-step on a near-uniformly-dark patch produces a near-zero scene estimate; the rows of <d-math>B</d-math> are correspondingly small in absolute terms even if their conditioning is fine; any noise then dominates the <d-math>g</d-math>-update. A correct gate would key on the <em>magnitude</em> of <d-math>\hat{s}</d-math> (e.g., <d-math>\|\hat{s}\|_2</d-math> or its total variance) rather than <d-math>\kappa</d-math>. We mark this as a corrected, sharper version of the open problem.</p>
 
     <figure>
-      <img src="figures/identifiability_gate.png" alt="Identifiability gate sweep and per-scene scatter">
-      <figcaption><em>Figure 7.</em> Left: mean PSNR as a function of the gate threshold <d-math>\tau</d-math> on <d-math>\log_{10}\kappa</d-math>. Best <d-math>\tau^\star = 1.37</d-math> achieves essentially zero advantage over sequential-only. Right: per-scene joint-minus-sequential gain vs <d-math>\log_{10}\kappa</d-math>. The expected monotone relationship is absent &mdash; moon sits in the bottom-left, opposite to what the gate hypothesis predicts.</figcaption>
+      <img src="figures/identifiability_gate.png" alt="Scene-level joint-minus-sequential PSNR versus condition number, highlighting the moon failure">
+      <figcaption><em>Figure 7.</em> Per-scene joint-minus-sequential PSNR versus <d-math>\log_{10}\kappa(B^\top B)</d-math>. The dashed line and shaded regions show the decisions made by the best threshold <d-math>\tau^\star = 1.37</d-math>. It still sends <em>moon</em> &mdash; the lowest-condition-number scene and largest joint failure &mdash; to the joint method, yielding only +0.01&nbsp;dB mean improvement over sequential-only recovery.</figcaption>
     </figure>
 
     <h2 id="conclusion">Conclusion and future work</h2>
 
-    <p>We presented our framework, a single-stage compressive-sensing formulation that recovers a sparse reflectance image and a smooth illumination field simultaneously, replacing the conventional sequential CS-then-ISP ordering. The joint objective is block-convex with a fast FISTA inner loop and a closed-form ridge step on the illumination, and the <d-math>c</d-math>-step can be deep-unfolded into a learned <d-math>K</d-math>-layer LISTA. On a 5-scene <d-math>8\times</d-math>-illumination-gradient benchmark the joint pipeline outperforms a strong sequential baseline by up to 4.7&nbsp;dB on textured scenes; the LISTA inner solver matches at <d-math>K{=}10</d-math> what FISTA needs <d-math>22</d-math> iterations to reach.</p>
+    <p>The joint pipeline outperforms a sequential baseline by up to 4.7&nbsp;dB on textured scenes but fails on a low-energy scene. In a separate fixed-operator diagnostic, five-seed LISTA matches at <d-math>K{=}10</d-math> what FISTA needs <d-math>23</d-math> iterations to reach, although dense LISTA does not improve measured batch-1 CPU latency.</p>
 
     <h3>Limitations</h3>
     <ul>

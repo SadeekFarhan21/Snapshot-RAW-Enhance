@@ -113,12 +113,14 @@ export default function(dom, data) {
     var names = ent.author.split(' and ');
     let name_strings = names.map(name => {
       name = name.trim();
+      let last;
+      let firsts;
       if (name.indexOf(',') != -1){
-        var last = name.split(',')[0].trim();
-        var firsts = name.split(',')[1];
+        last = name.split(',')[0].trim();
+        firsts = name.split(',')[1];
       } else {
-        var last = name.split(' ').slice(-1)[0].trim();
-        var firsts = name.split(' ').slice(0,-1).join(' ');
+        last = name.split(' ').slice(-1)[0].trim();
+        firsts = name.split(' ').slice(0,-1).join(' ');
       }
       var initials = '';
       if (firsts != undefined) {
@@ -159,15 +161,16 @@ export default function(dom, data) {
   function link_string(ent){
     if ('url' in ent){
       var url = ent.url;
-      var arxiv_match = (/arxiv\.org\/abs\/([0-9\.]*)/).exec(url);
+      var arxiv_match = (/arxiv\.org\/abs\/([0-9.]*)/).exec(url);
       if (arxiv_match != null){
         url = `http://arxiv.org/pdf/${arxiv_match[1]}.pdf`;
       }
 
+      let label;
       if (url.slice(-4) == '.pdf'){
-        var label = 'PDF';
+        label = 'PDF';
       } else if (url.slice(-5) == '.html') {
-        var label = 'HTML';
+        label = 'HTML';
       }
       return ` &ensp;<a href="${url}">[${label||'link'}]</a>`;
     }/* else if ("doi" in ent){
@@ -241,8 +244,8 @@ export default function(dom, data) {
       var names = ent.author.split(' and ');
       names = names.map(name => name.split(',')[0].trim());
       var title = ent.title.split(' ');//.replace(/[,:]/, "")
-      var url = 'http://search.labs.crossref.org/dois?';//""https://scholar.google.com/scholar?"
-      url += uris({q: names.join(' ') + ' ' + title.join(' ')});
+      const query = new URLSearchParams({q: names.join(' ') + ' ' + title.join(' ')});
+      return 'http://search.labs.crossref.org/dois?' + query.toString();
     }
 
   }

@@ -206,13 +206,13 @@
         \medskip
         \textbf{Honest failure-mode analysis.} Joint catastrophically
         fails on near-uniform scenes (moon, $-8$\,dB); traced to
-        rank-deficiency of $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$,
-        suggesting a deployment-time identifiability gate.
+        scene-energy deficiency in the first c-step, suggesting a
+        deployment-time energy gate.
 
         \medskip
         \textbf{Headline result.} $+1.1$ to $+4.7$\,dB on textured
-        scenes (cameraman, astronaut); $2.2\times$ inference speedup
-        from LISTA at matched recovery.
+        scenes (cameraman, astronaut); $2.3\times$ matched iteration
+        reduction from five-seed LISTA, but no CPU latency gain.
 
       \end{alertblock}
 
@@ -286,7 +286,7 @@
         \textbf{Replace} the two-stage pipeline with a single objective:
         \[
           \min_{\boldsymbol{c},\boldsymbol{g}}\;
-          \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_\textrm{pix})
+          \tfrac12\big\|\boldsymbol{A}\,\mathrm{diag}(\boldsymbol{g}_{\mathrm{pix}})
           \bm{\Psi}\boldsymbol{c}-\boldsymbol{y}\big\|_2^2
           +\lambda_c\|\boldsymbol{c}\|_1
           +\lambda_g\|\nabla\boldsymbol{g}\|_2^2.
@@ -298,10 +298,10 @@
         \heading{Block-coordinate recipe}
         Initialise $\boldsymbol{g}^{(0)}{=}\boldsymbol{1}$,
         $\boldsymbol{c}^{(0)}{=}\boldsymbol{0}$. For
-        $t{=}1,\dots,T_\textrm{outer}{=}8$: the
+        $t{=}1,\dots,T_{\mathrm{outer}}{=}8$: the
         \textbf{$\boldsymbol{c}$-update} runs $T_c$ FISTA (or $K$ LISTA)
         steps on
-        $\boldsymbol{A}_{\!\textrm{eff}}(\boldsymbol{g}^{(t-1)})$; the
+        $\boldsymbol{A}_{\!\mathrm{eff}}(\boldsymbol{g}^{(t-1)})$; the
         \textbf{$\boldsymbol{g}$-update} solves
         $(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}{+}\lambda_g\boldsymbol{L})\boldsymbol{g}{=}\boldsymbol{B}^{\!\top}\!\boldsymbol{y}$
         in closed form, clamping to $[\epsilon_g,\infty)$.
@@ -319,7 +319,7 @@
         Laplacian. The scalar invariance
         $(\boldsymbol{s},\boldsymbol{g})\!\to\!(a\boldsymbol{s},\boldsymbol{g}/a)$
         is resolved at evaluation by the optimal positive gain
-        $a^\star{=}\langle\hat{\boldsymbol{s}},\boldsymbol{s}_\textrm{true}\rangle/\|\hat{\boldsymbol{s}}\|^2$,
+        $a^\star{=}\langle\hat{\boldsymbol{s}},\boldsymbol{s}_{\mathrm{true}}\rangle/\|\hat{\boldsymbol{s}}\|^2$,
         applied identically to baselines.
 
         \heading{Deep-unfolded LISTA inner solver}
@@ -404,16 +404,16 @@
           \midrule
           ISTA   & $10$  & $0.467$ \\
           FISTA  & $10$  & $0.337$ \\
-          \textbf{LISTA}  & $10$  & $\mathbf{0.050}$ \\
+          \textbf{LISTA}  & $10$  & $\mathbf{0.0435{\pm}0.0120}$ \\
           \midrule
-          FISTA (matched) & $22$  & $\approx 0.05$ \\
+          FISTA (matched) & $23$  & $\approx 0.0435$ \\
           FISTA (conv.)   & $500$ & $0.005$ \\
           \bottomrule
         \end{tabular}
 
         \raggedright
-        \textbf{$2.2\times$ inference speedup} at matched recovery;
-        $10\times$ smaller deployment cost vs.\ converged $\ell_1$.
+        \textbf{$2.3\times$ iteration reduction}, but measured batch-1
+        CPU latency is $0.664$\,ms (LISTA) vs.\ $0.484$\,ms (FISTA).
 
       \end{block}
 
@@ -478,7 +478,7 @@
 
         $8{\times}$ horizontal illumination gradient, SNR${=}25$\,dB,
         $16{\times}16$ center patch per scene.
-        $\Delta{=}\textrm{PSNR}_\textrm{joint}{-}\textrm{PSNR}_\textrm{seq}$.
+        $\Delta{=}\mathrm{PSNR}_{\mathrm{joint}}{-}\mathrm{PSNR}_{\mathrm{seq}}$.
 
         \medskip
         \begin{figure}
@@ -542,16 +542,17 @@
 
         \heading{Failure mode: near-uniform scenes}
         Moon's centre patch is mostly black sky after $8{\times}$ gradient
-        multiplication, so $\boldsymbol{B}^{\!\top}\!\boldsymbol{B}$ becomes
-        rank-deficient and per-column gains are non-identifiable; the
-        alternation then drives $\boldsymbol{g}$ to a noise-fitting solution.
+        multiplication, so the first c-step has too little scene energy;
+        noise then dominates the gain update and drives $\boldsymbol{g}$
+        to a noise-fitting solution.
         The sequential pipeline avoids this by \emph{never} estimating
         $\boldsymbol{g}$ -- its column-mean divisor is essentially a copy
         of the gradient. \textbf{When the scene cannot identify
         $\boldsymbol{g}$, refusing to estimate it is a virtue.}
-        \textbf{Deployment rule:} gate the joint solution on
-        $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B}){<}\tau$ and fall back
-        to sequential otherwise.
+        A $\kappa(\boldsymbol{B}^{\!\top}\!\boldsymbol{B})$ gate was tested
+        and falsified. \textbf{Deployment rule:} gate on the first c-step's
+        scene energy $\|\hat{\boldsymbol{s}}\|_2$ and fall back to sequential
+        when it is too small.
 
         \heading{Other limitations}
         The 1D illumination model suits horizontal gradients (2D

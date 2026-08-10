@@ -15,7 +15,7 @@
     "dev": "rollup -c rollup.config.dev.js -w",
     "serve": "http-server",
     "test": "mocha",
-    "lint": "eslint",
+    "lint": "eslint src test bin rollup.config.common.js rollup.config.dev.js rollup.config.prod.js",
     "build": "rollup -c rollup.config.prod.js"
   },
   "repository": {

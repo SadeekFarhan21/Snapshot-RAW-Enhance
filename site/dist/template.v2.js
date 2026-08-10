@@ -549,8 +549,7 @@
           lookingForLeft = false;
         }
 
-        while (true) {
-          // eslint-disable-line no-constant-condition
+        while (true) { // eslint-disable-line no-constant-condition
           if (lookingForLeft) {
             nextIndex = text.indexOf(leftDelim, currIndex);
             if (nextIndex === -1) {
@@ -862,20 +861,22 @@ ${math}
     var names = ent.author.split(" and ");
     let name_strings = names.map(name => {
       name = name.trim();
+      let last;
+      let firsts;
       if (name.indexOf(",") != -1) {
-        var last = name.split(",")[0].trim();
-        var firsts = name.split(",")[1];
+        last = name.split(",")[0].trim();
+        firsts = name.split(",")[1];
       } else if (name.indexOf(" ") != -1) {
-        var last = name
+        last = name
           .split(" ")
           .slice(-1)[0]
           .trim();
-        var firsts = name
+        firsts = name
           .split(" ")
           .slice(0, -1)
           .join(" ");
       } else {
-        var last = name.trim();
+        last = name.trim();
       }
       var initials = "";
       if (firsts != undefined) {
@@ -921,15 +922,16 @@ ${math}
   function link_string(ent) {
     if ("url" in ent) {
       var url = ent.url;
-      var arxiv_match = /arxiv\.org\/abs\/([0-9\.]*)/.exec(url);
+      var arxiv_match = /arxiv\.org\/abs\/([0-9.]*)/.exec(url);
       if (arxiv_match != null) {
         url = `http://arxiv.org/pdf/${arxiv_match[1]}.pdf`;
       }
 
+      let label;
       if (url.slice(-4) == ".pdf") {
-        var label = "PDF";
+        label = "PDF";
       } else if (url.slice(-5) == ".html") {
-        var label = "HTML";
+        label = "HTML";
       }
       return ` &ensp;<a href="${url}">[${label || "link"}]</a>`;
     } /* else if ("doi" in ent){

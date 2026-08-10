@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* global it, should, describe */
+/* global it, should, describe, distill */
 
 // Test format: https://mochajs.org/#bdd
 // Assertion format: http://chaijs.com/api/bdd/

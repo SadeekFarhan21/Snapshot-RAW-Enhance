@@ -29,18 +29,27 @@ class LISTA(nn.Module):
     is fixed. The forward call returns the recovered signal (B x N).
     """
 
-    def __init__(self, A: torch.Tensor, n_layers: int = 10, lam_init: float = 0.05):
+    def __init__(
+        self,
+        A: torch.Tensor,
+        n_layers: int = 10,
+        lam_init: float = 0.05,
+        step: float | None = None,
+    ):
         super().__init__()
         self.n_layers = n_layers
         M, N = A.shape
         # Lipschitz constant for normalized A
-        with torch.no_grad():
-            L = torch.linalg.matrix_norm(A.T @ A, ord=2).item()
-        step = 1.0 / max(L, 1e-8)
+        if step is None:
+            with torch.no_grad():
+                L = torch.linalg.matrix_norm(A.T @ A, ord=2).item()
+            step = 1.0 / max(L, 1e-8)
 
         # Initialize at the classical ISTA values
         self.W_e = nn.Parameter(step * A.T.clone())            # N x M
-        self.W_t = nn.Parameter(torch.eye(N) - step * (A.T @ A))  # N x N
+        self.W_t = nn.Parameter(
+            torch.eye(N, device=A.device, dtype=A.dtype) - step * (A.T @ A)
+        )  # N x N
         self.theta = nn.Parameter(torch.full((n_layers,), step * lam_init))
 
         self.register_buffer("A", A.clone())

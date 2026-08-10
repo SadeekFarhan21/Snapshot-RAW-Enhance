@@ -1,11 +1,10 @@
 """Experiment 6 — Identifiability gate for Joint-CS (fast).
 
-The 'moon' scene in Experiment 4 broke the joint pipeline because the
-B^T B matrix in the g-update is rank-deficient (the scene has near-zero
-energy in most columns, so the per-column gain is non-identifiable).
-The paper's conclusion proposes gating on kappa(B^T B) and falling back
-to the sequential pipeline when the condition number is too large.
-This experiment actually measures kappa per scene and tests the gate.
+The 'moon' scene in Experiment 4 broke the joint pipeline.  A natural
+hypothesis is that B^T B in the g-update is ill-conditioned, suggesting a
+gate on kappa(B^T B) with fallback to the sequential pipeline.  This
+experiment measures kappa per scene and falsifies that hypothesis: moon has
+the lowest measured condition number but the largest joint-recovery loss.
 
 Setup mirrors joint_vs_sequential.py — 5 scenes, 16x16 center patches,
 8x horizontal illumination gradient, SNR=25 dB, delta=0.4 — and for
@@ -209,30 +208,74 @@ def main():
     with open(out_dir / "identifiability_gate.json", "w") as f:
         json.dump(summary, f, indent=2)
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), constrained_layout=True)
-    axes[0].plot(tau_grid, mean_psnr_gated, "-", color="C2", label="gated")
-    axes[0].axhline(seq_ps.mean(),   color="C0", ls="--", label="sequential only")
-    axes[0].axhline(joint_ps.mean(), color="C1", ls="--", label="joint only")
-    axes[0].axvline(tau_star, color="k", ls=":", alpha=0.6,
-                    label=fr"$\tau^* = {tau_star:.2f}$")
-    axes[0].set_xlabel(r"gate threshold $\tau$ on $\log_{10}\kappa$")
-    axes[0].set_ylabel("mean PSNR (dB) across scenes")
-    axes[0].set_title(rf"Gate sweep, $\delta={delta}$, SNR={snr_db:.0f} dB")
-    axes[0].grid(True, alpha=0.3); axes[0].legend(loc="best", fontsize=9)
-    for r in rows:
-        c = "C2" if r["log10_kappa"] < tau_star else "C0"
-        axes[1].scatter(r["log10_kappa"], r["psnr_joint"]-r["psnr_seq"],
-                        s=80, c=c, edgecolor="k")
-        axes[1].annotate(r["scene"], (r["log10_kappa"], r["psnr_joint"]-r["psnr_seq"]),
-                         xytext=(5, 5), textcoords="offset points", fontsize=9)
-    axes[1].axhline(0, color="k", ls="-", alpha=0.3)
-    axes[1].axvline(tau_star, color="k", ls=":", alpha=0.6,
-                    label=fr"$\tau^*={tau_star:.2f}$")
-    axes[1].set_xlabel(r"$\log_{10}\kappa(B^\top B)$ after first c-step")
-    axes[1].set_ylabel("PSNR(joint) − PSNR(seq) (dB)")
-    axes[1].set_title("Per-scene identifiability vs joint−seq gain")
-    axes[1].grid(True, alpha=0.3); axes[1].legend(fontsize=9)
-    fig.savefig(ROOT / "figures" / "identifiability_gate.png", dpi=140)
+    # A single diagnostic is more legible in the paper than the earlier
+    # two-panel threshold sweep.  The shaded regions show the decision made by
+    # the best threshold: choose joint on the left and sequential on the right.
+    fig, ax = plt.subplots(figsize=(8.8, 4.4), constrained_layout=True)
+    x_min = float(log_kappas.min() - 0.10)
+    x_max = float(log_kappas.max() + 0.10)
+    ax.axvspan(x_min, tau_star, color="#2563eb", alpha=0.055, zorder=0)
+    ax.axvspan(tau_star, x_max, color="#64748b", alpha=0.055, zorder=0)
+    ax.axhline(0, color="#334155", lw=1.2, zorder=1)
+    ax.axvline(tau_star, color="#475569", lw=1.4, ls="--", zorder=1)
+
+    label_offsets = {
+        "cameraman": (18, 0),
+        "coins": (8, -18),
+        "astronaut": (-68, 8),
+        "page": (-42, -19),
+        "moon": (18, 0),
+    }
+    for row in rows:
+        gain = row["psnr_joint"] - row["psnr_seq"]
+        helps = gain >= 0
+        color = "#2563eb" if helps else "#dc2626"
+        marker = "*" if row["scene"] == "moon" else "o"
+        size = 190 if row["scene"] == "moon" else 105
+        ax.scatter(row["log10_kappa"], gain, s=size, marker=marker,
+                   color=color, edgecolor="white", linewidth=1.2, zorder=3)
+        ax.annotate(row["scene"], (row["log10_kappa"], gain),
+                    xytext=label_offsets[row["scene"]],
+                    textcoords="offset points", fontsize=10, fontweight="semibold",
+                    color="#0f172a",
+                    va="center" if row["scene"] in {"moon", "cameraman"}
+                    else "baseline")
+
+    ax.text((x_min + tau_star) / 2, 5.15, "gate selects joint",
+            ha="center", va="top", fontsize=9.5, color="#1d4ed8")
+    ax.text((tau_star + x_max) / 2, 5.15, "gate selects sequential",
+            ha="center", va="top", fontsize=9.5, color="#475569")
+    moon_row = next(row for row in rows if row["scene"] == "moon")
+    ax.annotate("lowest condition number,\nbut largest failure",
+                xy=(moon_row["log10_kappa"],
+                    moon_row["psnr_joint"] - moon_row["psnr_seq"]),
+                xytext=(1.18, -5.2), textcoords="data",
+                arrowprops={"arrowstyle": "->", "color": "#991b1b", "lw": 1.2},
+                fontsize=9.5, color="#991b1b", ha="center")
+
+    gate_gain = best_mean - float(seq_ps.mean())
+    ax.text(0.985, 0.055,
+            rf"best $\kappa$-gate vs. sequential: ${gate_gain:+.2f}$ dB mean",
+            transform=ax.transAxes, ha="right", va="bottom", fontsize=10,
+            color="#0f172a",
+            bbox={"boxstyle": "round,pad=0.35", "facecolor": "white",
+                  "edgecolor": "#cbd5e1", "alpha": 0.95})
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(-9.4, 5.6)
+    ax.set_xlabel(r"condition number after first c-step, $\log_{10}\kappa(B^\top B)$",
+                  fontsize=11)
+    ax.set_ylabel(r"joint $-$ sequential PSNR (dB)", fontsize=11)
+    ax.set_title("Condition number does not predict joint-recovery benefit",
+                 fontsize=13, fontweight="semibold", pad=12)
+    ax.tick_params(labelsize=10)
+    ax.grid(True, color="#cbd5e1", alpha=0.55, linewidth=0.7)
+    ax.set_axisbelow(True)
+    for spine in ax.spines.values():
+        spine.set_color("#94a3b8")
+
+    fig.savefig(ROOT / "figures" / "identifiability_gate.png", dpi=220,
+                facecolor="white")
     print(f"\n[gate] saved figures/identifiability_gate.png", flush=True)
 
 

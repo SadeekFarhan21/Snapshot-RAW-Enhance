@@ -143,16 +143,17 @@ function xml(obj) {
   let name = keys[0];
   var full_content = obj[name];
   var attr = {};
+  let content;
   if (Array.isArray(full_content)){
-    var content = [];
+    content = [];
     for (var i in  full_content) {
-      var obj = full_content[i];
-      var obj_name = Object.keys(obj)[0];
+      const child = full_content[i];
+      var obj_name = Object.keys(child)[0];
       if ('_attr' == obj_name) {
-        attr = obj['_attr'];
+        attr = child['_attr'];
       } else {
         //console.log(Object.keys(obj)[0])
-        content.push(obj);
+        content.push(child);
       }
     }
   } else {
@@ -164,18 +165,19 @@ function xml(obj) {
 
   let attr_string = '';
   for (var k in attr) {
-    attr_string += ` ${k}=\"${attr[k]}\"`;
+    attr_string += ` ${k}="${attr[k]}"`;
   }
 
   //console.log(typeof content, Array.isArray(content), content instanceof String, content)
+  let result;
   if (Array.isArray(content)){
     content = content.map(xml);
     content = content.join('\n').split('\n');
     content = content.map(s => '  ' + s).join('\n');
-    var result = `<${name}${attr_string}>\n${content}\n</${name}>`;
+    result = `<${name}${attr_string}>\n${content}\n</${name}>`;
   } else {
     content = xml(content);
-    var result = `<${name}${attr_string}>${content}</${name}>`;
+    result = `<${name}${attr_string}>${content}</${name}>`;
   }
   return result;
 }

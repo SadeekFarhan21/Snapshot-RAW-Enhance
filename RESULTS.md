@@ -6,10 +6,9 @@ numbers are produced by scripts in `experiments/`; see the JSON files in
 
 ## Setup
 
-**Environment.** Python 3.13, NumPy 2.4, SciPy 1.17, scikit-image 0.26,
-PyTorch 2.12 (CPU build — the available CUDA driver is 12.080 but PyTorch
-was compiled against CUDA 13; LISTA training runs on CPU). All experiments
-seed their RNGs.
+**Environment.** Classical experiments use Python 3.13, NumPy 2.4, SciPy
+1.17, and scikit-image 0.26. The five-seed LISTA run used PyTorch 2.7 with
+CUDA 12.8 on a Quadro RTX 8000. All experiments seed their RNGs.
 
 **Solvers compared.** Greedy OMP, ISTA, FISTA (Nesterov-accelerated ISTA),
 ADMM for the unconstrained Lasso, and a deep-unfolded LISTA with K=10
@@ -77,12 +76,14 @@ is no longer well-matched. The $\sim 3$–$4$ dB std across scenes reflects
 per-image difficulty: `moon` is the easiest (low entropy, mostly black),
 `coins` is the hardest (textured, high spatial frequency).
 
-## Experiment 3 — LISTA vs ISTA / FISTA at matched compute
+## Experiment 3 — LISTA vs ISTA / FISTA at matched depth
 
 Train LISTA (K=10 unfolded layers, tied W_e and W_t, per-layer learnable
 threshold) on 5000 synthetic (y, x) pairs at N=200, M=80, S=10, SNR=30 dB.
-Compare validation NMSE against ISTA / FISTA evaluated at exactly K=10
-iterations, and against fully-converged ISTA / FISTA (500 iters).
+The sensing matrix, training set, and validation set are fixed, while optimizer
+initialization is repeated for five seeds. Compare validation NMSE against
+ISTA / FISTA evaluated at exactly K=10 iterations and against converged
+ISTA / FISTA (500 iterations).
 
 - Figure: `figures/lista_comparison.png`
 - Data:   `results/lista_results.json`
@@ -93,20 +94,35 @@ iterations, and against fully-converged ISTA / FISTA (500 iters).
 | :--- | :---: |
 | ISTA  | 0.4667 |
 | FISTA | 0.3369 |
-| LISTA | **0.0501** |
+| LISTA (5 seeds) | **0.0435 ± 0.0120** |
 
-LISTA achieves an order of magnitude lower NMSE than FISTA at the same
-compute budget. Counting iterations required to match LISTA's NMSE,
-FISTA needs **22 iterations** versus LISTA's 10 unrolled layers
-($\sim 2.2\times$ speedup at matched recovery quality). Fully converged
-ISTA/FISTA (500 iterations) reach NMSE $\approx 0.0050$ — so LISTA still
-trails the converged $L_1$ minimum by a factor of $\sim 10$, but
-amortizes that gap into a tiny inference cost. We also observed brief
-divergence during training (epochs 20–30: NMSE blew up to $\sim 10^3$
-before recovering) because the K-layer recurrence
-$x_{k+1} = \mathrm{soft}(W_t x_k + W_e y, \theta_k)$ is sensitive to
-$W_t$'s spectral radius drifting above 1. Gradient clipping plus
-best-checkpoint restore (epoch 17) neutralizes this.
+The five seed NMSEs range from 0.0291 to 0.0572. FISTA needs **23
+iterations** to match the mean LISTA NMSE, versus 10 unrolled layers: a
+**2.3× iteration reduction**, not a wall-clock speedup claim. Per-seed matched
+counts average 23.2 ± 1.3 iterations. Training takes 83.1 ± 8.3 seconds per
+seed on the GPU. Fully converged ISTA/FISTA reach NMSE $\approx 0.0050$.
+The recurrence can deteriorate after its best checkpoint as the spectral
+radius of $W_t$ drifts, so training uses gradient clipping and restores the
+best validation checkpoint.
+
+### Compute and scaling benchmark
+
+`experiments/benchmark_compute.py` measures batch-1 float32 inference with
+one CPU thread and a precomputed step size. Times are medians; working memory
+is a conservative tensor accounting rather than process RSS.
+
+| $N$ | LISTA-10 (ms) | FISTA-23 (ms) | LISTA params | Working MiB (L/F) |
+| :---: | :---: | :---: | :---: | :---: |
+| 64 | 0.470 | 0.542 | 5,770 | 0.030 / 0.008 |
+| 200 | 0.664 | 0.484 | 56,010 | 0.279 / 0.066 |
+| 256 | 0.763 | 0.482 | 91,658 | 0.455 / 0.106 |
+| 1024 | 8.650 | 3.942 | 1,468,426 | 7.224 / 1.628 |
+
+At the paper setting ($N=200$), LISTA is about 37% slower despite using fewer
+layers/iterations. Dense LISTA uses 560,000 multiply-adds there versus 736,000
+for FISTA-23, but framework overhead and the dense $N\times N$ recurrence
+erase that arithmetic advantage. At $N=1024$, the quadratic learned map makes
+LISTA more than twice as slow and over four times larger in working memory.
 
 ## Experiment 4 — Joint vs sequential recovery under illumination gradient
 
@@ -156,19 +172,21 @@ catastrophically fails on near-uniform scenes* (moon: −7.8 to −10.0 dB).
 **Mechanism behind the moon failure.** Moon's center patch is mostly
 black sky. After [0,1] normalization and 8× gradient multiplication,
 most columns of the raw signal carry near-zero energy, so the
-$\boldsymbol{B}^\top \boldsymbol{B}$ matrix in the $\boldsymbol{g}$-update
-is severely rank-deficient and the per-column gains are non-identifiable.
-The block-coordinate alternation then drives $\boldsymbol{g}$ toward a
-high-variance solution that explains the noise rather than the absent
-signal. Sequential avoids this because it never tries to estimate
+first c-step produces a near-zero scene estimate. The resulting gain-update
+design has too little absolute signal energy, allowing noise to dominate even
+though its conditioning is not unusually poor. The block-coordinate
+alternation then drives $\boldsymbol{g}$ toward a high-variance solution that
+explains the noise rather than the absent signal. Sequential avoids this
+because it never tries to estimate
 $\boldsymbol{g}$ from the measurements — its column-mean divisor is
 essentially a copy of the gradient, applied unconditionally. When the
 underlying scene is too sparse to identify $\boldsymbol{g}$, refusing to
 estimate it is a virtue.
 
-The takeaway: a deployed our pipeline should gate on a conditioning
-check ($\kappa(\boldsymbol{B}^\top\boldsymbol{B})$ below a threshold) and
-fall back to sequential when the scene is too uniform.
+This motivates a deployment gate, but Experiment 6 shows that conditioning
+$\kappa(\boldsymbol{B}^\top\boldsymbol{B})$ is the wrong gate signal. A gate
+should instead measure scene energy after the first c-step and fall back to
+sequential when that estimate is too weak.
 
 ## Experiment 5 — Noise robustness sweep
 
@@ -239,9 +257,9 @@ correct gate signal is $\|\hat{s}\|_2$, not $\kappa$.
 - **Rate-distortion (Exp. 2).** FISTA/ADMM beat OMP by 2–3 dB on a
   natural image across the useful $\delta$ range; FISTA and ADMM are
   within 0.5 dB of each other.
-- **LISTA (Exp. 3).** A 10-layer learned solver matches what FISTA needs
-  22 iterations to reach (NMSE = 0.05), a $\sim 2.2\times$ iteration
-  speedup at the same recovery quality.
+- **LISTA (Exp. 3).** Across five optimizer seeds, a 10-layer learned solver
+  obtains NMSE $0.0435\pm0.0120$; FISTA needs 23 iterations to match the mean.
+  This is a 2.3× iteration reduction, but not a measured latency speedup.
 - **Joint vs sequential (Exp. 4).** Scene-dependent. Joint wins on
   textured scenes by up to +4.7 dB (cameraman, astronaut), is a wash on
   moderate-content scenes (coins, page), and fails catastrophically on
@@ -267,6 +285,7 @@ export OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 \
 python3 experiments/phase_transition.py     # ~8 min on CPU
 python3 experiments/rate_distortion.py      # ~12 s
 python3 experiments/train_lista.py          # ~4 min
+python3 experiments/benchmark_compute.py    # ~1 min
 python3 experiments/joint_vs_sequential.py  # ~5 s
 python3 experiments/noise_robustness.py     # ~1 s
 python3 experiments/identifiability_gate.py # ~1 s

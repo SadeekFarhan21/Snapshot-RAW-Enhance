@@ -1,0 +1,31 @@
+{
+  "latex-workshop.latex.outDir": "%DIR%",
+  "latex-workshop.latex.recipe.default": "first",
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk (pdfLaTeX, from document directory)",
+      "command": "latexmk",
+      "args": [
+        "-cd",
+        "-pdf",
+        "-pdflatex=pdflatex %O %S",
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-halt-on-error",
+        "%DOC%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Build current LaTeX document",
+      "tools": [
+        "latexmk (pdfLaTeX, from document directory)"
+      ]
+    }
+  ],
+  "code-runner.executorMapByFileExtension": {
+    ".tex": "latexmk -cd -pdf -pdflatex='pdflatex %O %S' -synctex=1 -interaction=nonstopmode -halt-on-error \"$fullFileName\""
+  },
+  "code-runner.runInTerminal": true
+}

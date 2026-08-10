@@ -3,7 +3,7 @@
 main: poster.pdf
 
 poster.pdf: FORCE
-	latexmk -f -pdflatex='pdflatex -interaction nonstopmode' -pdf poster.tex || test -f poster.pdf
+	latexmk -pdflatex='pdflatex -interaction nonstopmode -halt-on-error' -pdf poster.tex
 
 clean:
 	latexmk -pdf -C

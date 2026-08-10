@@ -25,7 +25,7 @@ export function collect_citations(dom = document) {
   return [...citations];
 }
 
-export function inline_cite_short(keys) {
+export function inline_cite_short(keys, data) {
   function cite_string(key) {
     if (key in data.bibliography) {
       var n = data.citations.indexOf(key) + 1;
@@ -37,7 +37,7 @@ export function inline_cite_short(keys) {
   return "[" + keys.map(cite_string).join(", ") + "]";
 }
 
-export function inline_cite_long(keys) {
+export function inline_cite_long(keys, data) {
   function cite_string(key) {
     if (key in data.bibliography) {
       var ent = data.bibliography[key];
@@ -61,20 +61,22 @@ function author_string(ent, template, sep, finalSep) {
   var names = ent.author.split(" and ");
   let name_strings = names.map(name => {
     name = name.trim();
+    let last;
+    let firsts;
     if (name.indexOf(",") != -1) {
-      var last = name.split(",")[0].trim();
-      var firsts = name.split(",")[1];
+      last = name.split(",")[0].trim();
+      firsts = name.split(",")[1];
     } else if (name.indexOf(" ") != -1) {
-      var last = name
+      last = name
         .split(" ")
         .slice(-1)[0]
         .trim();
-      var firsts = name
+      firsts = name
         .split(" ")
         .slice(0, -1)
         .join(" ");
     } else {
-      var last = name.trim();
+      last = name.trim();
     }
     var initials = "";
     if (firsts != undefined) {
@@ -120,15 +122,16 @@ function venue_string(ent) {
 function link_string(ent) {
   if ("url" in ent) {
     var url = ent.url;
-    var arxiv_match = /arxiv\.org\/abs\/([0-9\.]*)/.exec(url);
+    var arxiv_match = /arxiv\.org\/abs\/([0-9.]*)/.exec(url);
     if (arxiv_match != null) {
       url = `http://arxiv.org/pdf/${arxiv_match[1]}.pdf`;
     }
 
+    let label;
     if (url.slice(-4) == ".pdf") {
-      var label = "PDF";
+      label = "PDF";
     } else if (url.slice(-5) == ".html") {
-      var label = "HTML";
+      label = "HTML";
     }
     return ` &ensp;<a href="${url}">[${label || "link"}]</a>`;
   } /* else if ("doi" in ent){
@@ -213,7 +216,9 @@ function get_GS_URL(ent) {
     var names = ent.author.split(" and ");
     names = names.map(name => name.split(",")[0].trim());
     var title = ent.title.split(" "); //.replace(/[,:]/, "")
-    var url = "http://search.labs.crossref.org/dois?"; //""https://scholar.google.com/scholar?"
-    url += uris({ q: names.join(" ") + " " + title.join(" ") });
+    const query = new URLSearchParams({
+      q: names.join(" ") + " " + title.join(" ")
+    });
+    return "http://search.labs.crossref.org/dois?" + query.toString();
   }
 }
